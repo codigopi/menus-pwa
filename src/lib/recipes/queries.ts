@@ -13,6 +13,11 @@ export async function fetchRecipes() {
   return repo.listRecipes();
 }
 
+export async function fetchRecipesForMatching() {
+  await connection();
+  return repo.listRecipesForMatching();
+}
+
 export async function fetchRecipe(id: string) {
   await connection();
   return repo.getRecipe(id);

@@ -12,6 +12,7 @@ import { asc, desc, eq } from "drizzle-orm";
 import { getDb, type AppDb } from "@/lib/db";
 import { recipeIngredients, recipes } from "@/lib/db/schema";
 import type { IngredientInput, Recipe, RecipeInput, RecipeSummary } from "@/lib/domain/recipe";
+import type { MatchableRecipe } from "@/lib/domain/matching";
 import type { UnitKey } from "@/lib/domain/units";
 
 type RecipeRow = typeof recipes.$inferSelect;
@@ -94,6 +95,30 @@ export function listRecipes(db: AppDb = getDb()): RecipeSummary[] {
     .from(recipes)
     .orderBy(desc(recipes.updatedAt))
     .all();
+}
+
+/** Recetas con sus ingredientes (solo lo necesario) para "¿Qué cocino?". */
+export function listRecipesForMatching(db: AppDb = getDb()): (RecipeSummary & MatchableRecipe)[] {
+  const summaries = listRecipes(db);
+  const rows = db
+    .select({
+      recipeId: recipeIngredients.recipeId,
+      name: recipeIngredients.name,
+      quantity: recipeIngredients.quantity,
+      unit: recipeIngredients.unit,
+      note: recipeIngredients.note,
+    })
+    .from(recipeIngredients)
+    .orderBy(asc(recipeIngredients.position))
+    .all();
+
+  const byRecipe = new Map<string, MatchableRecipe["ingredients"]>();
+  for (const { recipeId, ...ing } of rows) {
+    const list = byRecipe.get(recipeId) ?? [];
+    list.push(ing);
+    byRecipe.set(recipeId, list);
+  }
+  return summaries.map((s) => ({ ...s, ingredients: byRecipe.get(s.id) ?? [] }));
 }
 
 export function getRecipe(id: string, db: AppDb = getDb()): Recipe | null {

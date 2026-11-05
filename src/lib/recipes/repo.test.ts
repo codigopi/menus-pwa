@@ -5,7 +5,16 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { openDb, type AppDb } from "@/lib/db";
 import { recipeInputSchema, type RecipeInput } from "@/lib/domain/recipe";
-import { createRecipe, deleteRecipe, getRecipe, listRecipes, setFavorite, setRating, updateRecipe } from "./repo";
+import {
+  createRecipe,
+  deleteRecipe,
+  getRecipe,
+  listRecipes,
+  listRecipesForMatching,
+  setFavorite,
+  setRating,
+  updateRecipe,
+} from "./repo";
 
 const tortilla = (): RecipeInput =>
   recipeInputSchema.parse({
@@ -60,6 +69,15 @@ describe("repositorio de recetas", () => {
     setRating(id, 5, db);
     setFavorite(id, true, db);
     expect(getRecipe(id, db)).toMatchObject({ rating: 5, isFavorite: true });
+  });
+
+  it("listRecipesForMatching agrupa los ingredientes por receta", () => {
+    const a = createRecipe(tortilla(), null, db);
+    createRecipe({ ...tortilla(), title: "Sin ingredientes", ingredients: [] }, null, db);
+    const list = listRecipesForMatching(db);
+    expect(list).toHaveLength(2);
+    expect(list.find((r) => r.id === a)?.ingredients.map((i) => i.name)).toEqual(["huevos", "patatas", "sal"]);
+    expect(list.find((r) => r.id !== a)?.ingredients).toEqual([]);
   });
 
   it("borra en cascada", () => {

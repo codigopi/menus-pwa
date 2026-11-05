@@ -1,13 +1,23 @@
 import type { Metadata } from "next";
-import { Sparkles } from "lucide-react";
-import { ComingSoon } from "@/components/ui/coming-soon";
+import { Suspense } from "react";
+import { WhatToCook } from "@/components/cook/what-to-cook";
+import { PageHeader } from "@/components/ui/page-header";
+import { fetchRecipesForMatching } from "@/lib/recipes/queries";
 
 export const metadata: Metadata = { title: "¿Qué cocino?" };
 
-export default function Page() {
+export default function WhatToCookPage() {
   return (
-    <ComingSoon title="¿Qué cocino?" icon={<Sparkles className="size-8" />} phase={3}>
-      Dime qué tienes en la nevera y te propondré recetas de tu biblioteca o nuevas, priorizando el aprovechamiento.
-    </ComingSoon>
+    <>
+      <PageHeader title="¿Qué cocino?" subtitle="Con lo que tienes en casa" />
+      <Suspense fallback={<div className="h-40 animate-pulse rounded-2xl bg-card" />}>
+        <Content />
+      </Suspense>
+    </>
   );
+}
+
+async function Content() {
+  const recipes = await fetchRecipesForMatching();
+  return <WhatToCook recipes={recipes} />;
 }
