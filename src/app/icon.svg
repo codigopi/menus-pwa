@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fondo a sangre (apto para iconos "maskable"); el dibujo vive en el 60% central. -->
+  <rect width="512" height="512" fill="#557a5a"/>
+  <g fill="none" stroke="#f7f3ec" stroke-linecap="round" stroke-linejoin="round">
+    <!-- vapor -->
+    <path d="M206 150c-12-14 12-24 0-40M256 150c-12-14 12-24 0-40M306 150c-12-14 12-24 0-40" stroke-width="14"/>
+  </g>
+  <!-- tapa -->
+  <rect x="236" y="168" width="40" height="18" rx="9" fill="#f7f3ec"/>
+  <path d="M146 214c0-14 11-26 26-26h168c15 0 26 12 26 26v4H146z" fill="#f7f3ec"/>
+  <!-- cuerpo -->
+  <path d="M158 236h196v92c0 30-24 54-54 54h-88c-30 0-54-24-54-54z" fill="#f7f3ec"/>
+  <!-- asas -->
+  <path d="M158 262h-24M354 262h24" stroke="#f7f3ec" stroke-width="18" stroke-linecap="round"/>
+  <!-- detalle terracota -->
+  <rect x="158" y="272" width="196" height="22" fill="#c0673e"/>
+</svg>

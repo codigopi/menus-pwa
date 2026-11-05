@@ -1,26 +1,129 @@
 @import "tailwindcss";
 
+/*
+ * Tokens de diseño "Cocina en Casa".
+ * Estilo iOS cálido: fondo crema, tarjetas blancas, acento verde salvia y
+ * terracota como acento secundario. Se adaptan solos al modo oscuro.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --canvas: #f7f3ec;
+  --card: #ffffff;
+  --fill: #efe9df;
+  --fill-strong: #e4ddd1;
+  --ink: #1f1d1a;
+  --muted: #7a746b;
+  --hairline: rgb(60 50 40 / 0.12);
+  --accent: #557a5a;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2ebdf;
+  --terra: #c0673e;
+  --terra-soft: #f6e3d8;
+  --danger: #d1453b;
+  --star: #e3a33b;
+  --bar: rgb(247 243 236 / 0.82);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --canvas: #121110;
+    --card: #1d1c1a;
+    --fill: #2a2825;
+    --fill-strong: #36332f;
+    --ink: #f3efe9;
+    --muted: #a39d93;
+    --hairline: rgb(255 245 230 / 0.1);
+    --accent: #8db892;
+    --accent-ink: #10180f;
+    --accent-soft: #24312a;
+    --terra: #e48c62;
+    --terra-soft: #3a261c;
+    --danger: #ff6a5e;
+    --star: #f0b54e;
+    --bar: rgb(18 17 16 / 0.8);
   }
 }
 
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-card: var(--card);
+  --color-fill: var(--fill);
+  --color-fill-strong: var(--fill-strong);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-hairline: var(--hairline);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-terra: var(--terra);
+  --color-terra-soft: var(--terra-soft);
+  --color-danger: var(--danger);
+  --color-star: var(--star);
+  --color-bar: var(--bar);
+
+  /* Tipografía del sistema: SF Pro en iPhone/Mac. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  --font-rounded: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  background: var(--canvas);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  /* Evita el "rebote" de todo el documento al hacer scroll en iOS standalone. */
+  overscroll-behavior-y: none;
+}
+
+/* iOS hace zoom en inputs con letra < 16px: lo evitamos. */
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
+/* Respuesta táctil sutil, como los controles nativos. */
+.tap {
+  transition: transform 120ms ease, opacity 120ms ease, background-color 150ms ease;
+}
+.tap:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Oculta la barra de scroll en carruseles horizontales de chips. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

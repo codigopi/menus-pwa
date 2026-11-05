@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cocina en Casa
 
-## Getting Started
+PWA para gestionar las comidas y cenas de casa: recetas, importación desde redes, menú semanal, lista de la compra e histórico.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router, Cache Components) + **TypeScript** + **Tailwind v4**
+- **SQLite** (better-sqlite3) + **Drizzle ORM**, con migraciones automáticas al arrancar
+- Fotos en disco (`UPLOADS_DIR`), servidas por `/api/fotos/[nombre]`
+- **PWA**: manifest + service worker propio (`public/sw.js`) + página offline
+- **Vitest** para la lógica de dominio (`src/lib/domain`)
+
+## Desarrollo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # opcional: ajusta rutas o ACCESS_CODE
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La base de datos se crea sola en `./data/app.db` al abrir la primera página.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script | Qué hace |
+| --- | --- |
+| `npm run dev` | Servidor de desarrollo |
+| `npm test` | Tests unitarios y de integración (SQLite en memoria) |
+| `npm run typecheck` | Comprobación de tipos |
+| `npm run lint` | ESLint |
+| `npm run build` | Build de producción (standalone) |
+| `npm run db:generate` | Crea una migración tras cambiar `src/lib/db/schema.ts` |
+| `npm run icons` | Regenera los iconos PNG desde `scripts/icon.svg` |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+> El service worker solo se registra en producción. Para probar la PWA en local: `npm run build && npm start`.
 
-## Learn More
+## Estructura
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/(app)/          pantallas con barra de pestañas (recetas, menú, compra…)
+  app/acceso/         pantalla del código de acceso
+  app/api/fotos/      servidor de fotos
+  components/ui/      componentes estilo iOS (cabecera, listas, hojas, estrellas…)
+  components/recipes/ biblioteca, formulario y controles de receta
+  lib/domain/         lógica pura + tests (unidades, cantidades, esquema de receta)
+  lib/db/             conexión SQLite y esquema Drizzle
+  lib/recipes/        repositorio de datos (+ test de integración)
+  proxy.ts            puerta de acceso opcional (ACCESS_CODE)
+drizzle/              migraciones SQL versionadas
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Despliegue en Dokploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Crea una **Application** apuntando a este repositorio, con *Build Type* **Dockerfile**.
+2. En **Advanced → Volumes / Mounts** añade un volumen con *Mount Path* `/data`. Ahí viven la base de datos y las fotos, y es lo único que hay que respaldar.
+3. En **Environment** define al menos:
+   ```
+   ACCESS_CODE=un-codigo-que-solo-sepa-casa
+   ```
+   `DATABASE_PATH` y `UPLOADS_DIR` ya apuntan a `/data` dentro de la imagen.
+4. En **Domains** asigna un dominio con HTTPS (Let's Encrypt). Es obligatorio para instalar la PWA. Puerto del contenedor: `3000`.
+5. Despliega. Las migraciones se aplican solas al arrancar.
 
-## Deploy on Vercel
+**Copia de seguridad:** con la app parada, o usando `sqlite3 /data/app.db ".backup /data/backup.db"`, copia `/data`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Instalar en el iPhone
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Abre la URL en **Safari** → botón **Compartir** → **Añadir a pantalla de inicio**.
