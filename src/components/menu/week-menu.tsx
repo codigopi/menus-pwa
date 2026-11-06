@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { AlertTriangle, CalendarDays, Lock, Plus, RefreshCw, SlidersHorizontal, Soup, Trash2, Utensils, X } from "lucide-react";
+import { AlertTriangle, CalendarDays, Check, Lock, Plus, RefreshCw, SlidersHorizontal, Soup, Trash2, Utensils, X } from "lucide-react";
 import {
   deleteMenu,
   generateMenu,
@@ -11,6 +11,7 @@ import {
   setSlotRecipe,
   toggleSlotLock,
 } from "@/app/(app)/menu/actions";
+import { CookSheet } from "@/components/history/cook-sheet";
 import { CachePage } from "@/components/pwa/cache-page";
 import { RecipePhoto } from "@/components/recipes/recipe-photo";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -30,6 +31,7 @@ export function WeekMenu({ view }: { view: MenuView }) {
   const [pending, startTransition] = useTransition();
   const [busySlot, setBusySlot] = useState<string | null>(null);
   const [openSlot, setOpenSlot] = useState<SlotView | null>(null);
+  const [cookSlot, setCookSlot] = useState<SlotView | null>(null);
   const [paramsOpen, setParamsOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,6 +76,7 @@ export function WeekMenu({ view }: { view: MenuView }) {
     toggleLock: onSlot(toggleSlotLock),
     setRecipe: onSlot(setSlotRecipe),
     setFreeText: onSlot(setSlotFreeText),
+    cook: (slot) => setCookSlot(slot),
   };
 
   const openDay = plan?.days.find((d) => d.slots.some((s) => s.id === openSlot?.id));
@@ -201,6 +204,16 @@ export function WeekMenu({ view }: { view: MenuView }) {
         onClose={() => setOpenSlot(null)}
       />
 
+      {cookSlot?.recipe && (
+        <CookSheet
+          recipe={cookSlot.recipe}
+          defaultDate={cookSlot.date}
+          meal={cookSlot.meal}
+          slotId={cookSlot.id}
+          onClose={() => setCookSlot(null)}
+        />
+      )}
+
       {paramsOpen && (
         <ParamsSheet
           open
@@ -264,6 +277,11 @@ function SlotRow({ slot, busy, onOpen }: { slot: SlotView; busy: boolean; onOpen
       ) : (
         <span className="flex min-w-0 flex-1 items-center gap-2 text-[16px] text-muted/80">
           <Plus className="size-5" /> Sin plato
+        </span>
+      )}
+      {slot.cooked && (
+        <span className="grid size-6 shrink-0 place-items-center rounded-full bg-accent text-accent-ink" aria-label="Cocinado">
+          <Check className="size-4" strokeWidth={3} />
         </span>
       )}
       {slot.locked && <Lock className="size-4 shrink-0 text-muted" aria-label="Bloqueado" />}

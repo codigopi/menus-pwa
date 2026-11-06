@@ -29,6 +29,13 @@
       "when": 1793925323655,
       "tag": "0003_shopping",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793927210289,
+      "tag": "0004_history",
+      "breakpoints": true
     }
   ]
 }

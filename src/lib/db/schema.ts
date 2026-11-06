@@ -156,3 +156,26 @@ export const shoppingItems = sqliteTable(
   },
   (t) => [index("shopping_items_list_idx").on(t.listId)],
 );
+
+// ---------------------------------------------------------------- Fase 6: histórico
+
+/**
+ * Cada vez que se cocina un plato. Si se borra la receta, el registro se
+ * conserva con su título (recipe_title) para no perder el histórico.
+ */
+export const cookLogs = sqliteTable(
+  "cook_logs",
+  {
+    id: text("id").primaryKey(),
+    recipeId: text("recipe_id").references(() => recipes.id, { onDelete: "set null" }),
+    recipeTitle: text("recipe_title").notNull(),
+    cookedOn: text("cooked_on").notNull(),
+    meal: text("meal").$type<Meal>(),
+    /** Hueco del menú desde el que se marcó (para mostrar ✓ en el menú). */
+    slotId: text("slot_id").references(() => mealSlots.id, { onDelete: "set null" }),
+    rating: integer("rating"),
+    notes: text("notes"),
+    ...timestamps,
+  },
+  (t) => [index("cook_logs_recipe_idx").on(t.recipeId), index("cook_logs_date_idx").on(t.cookedOn)],
+);

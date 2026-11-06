@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
-import { BookOpen, ChevronLeft, CircleSlash, Lock, LockOpen, Search, Shuffle, Soup, Utensils } from "lucide-react";
+import { BookOpen, ChefHat, ChevronLeft, CircleSlash, Lock, LockOpen, Search, Shuffle, Soup, Utensils } from "lucide-react";
 import { RecipePhoto } from "@/components/recipes/recipe-photo";
 import { cn } from "@/components/ui/cn";
 import { Sheet } from "@/components/ui/sheet";
@@ -13,6 +13,8 @@ import type { MenuRecipe, SlotView } from "@/lib/menu/view";
 import { CategoryLabel } from "./category";
 
 export interface SlotActions {
+  /** Abre la hoja "Lo he cocinado" para este hueco. */
+  cook: (slot: SlotView) => void;
   regenerate: (slotId: string) => void;
   toggleLock: (slotId: string) => void;
   setRecipe: (slotId: string, recipeId: string) => void;
@@ -112,6 +114,11 @@ export function SlotSheet({
               <Link href={`/recetas/${slot.recipe.id}`} onClick={close} className="flex h-13 items-center gap-3 border-b border-hairline px-4 text-[17px] text-accent active:bg-fill">
                 <BookOpen className="size-5" /> Ver receta
               </Link>
+            )}
+            {slot.recipe && (
+              <SheetButton icon={<ChefHat className="size-5" />} onClick={run(() => actions.cook(slot))}>
+                {slot.cooked ? "Cocinado ✓ · cambiar valoración" : "Lo he cocinado"}
+              </SheetButton>
             )}
             <SheetButton icon={<Shuffle className="size-5" />} onClick={run(() => actions.regenerate(slot.id))}>
               {slot.recipe ? "Otra receta" : "Proponer receta"}

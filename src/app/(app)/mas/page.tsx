@@ -17,7 +17,7 @@ export default function Page() {
     <>
       <PageHeader title="Más" />
       <ListGroup>
-        <ListRow icon={iconBox("bg-terra", <History className="size-4" />)} title="Histórico" detail="Fase 6" />
+        <ListRow icon={iconBox("bg-terra", <History className="size-4" />)} title="Histórico" href="/historico" />
         <ListRow icon={iconBox("bg-accent", <Settings className="size-4" />)} title="Preferencias" detail="Fase 7" />
       </ListGroup>
       <ListGroup
@@ -41,7 +41,7 @@ export default function Page() {
         <ListRow icon={iconBox("bg-[#5b8bd6]", <Smartphone className="size-4" />)} title="Cocina en Casa como app" />
       </ListGroup>
       <ListGroup>
-        <ListRow icon={iconBox("bg-muted", <Info className="size-4" />)} title="Versión" detail="0.2 · Fase 2" />
+        <ListRow icon={iconBox("bg-muted", <Info className="size-4" />)} title="Versión" detail="0.6 · Fase 6" />
       </ListGroup>
     </>
   );

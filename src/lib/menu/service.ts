@@ -9,7 +9,18 @@ import { MEALS, type PlanParams } from "@/lib/domain/menu";
 import { planWeek, replanSlot, type PlannerRecipe, type PlannerSlot } from "@/lib/domain/menu-planner";
 import { recipeCost } from "@/lib/domain/shopping";
 import { listRecipesForMatching } from "@/lib/recipes/repo";
+import { cookedRecently } from "@/lib/history/repo";
 import * as repo from "./repo";
+
+/** Lo reciente = lo planificado en menús anteriores + lo realmente cocinado (lo más cercano). */
+function recentFor(weekStart: IsoDate, db: AppDb): Map<string, number> {
+  const map = repo.recentRecipes(weekStart, 14, db);
+  for (const [id, ago] of cookedRecently(weekStart, 14, db)) {
+    const prev = map.get(id);
+    if (prev === undefined || ago < prev) map.set(id, ago);
+  }
+  return map;
+}
 
 /** Recetas de la biblioteca con su coste orientativo por ración. */
 export function plannerRecipes(db: AppDb = getDb()): (PlannerRecipe & ReturnType<typeof listRecipesForMatching>[number])[] {
@@ -44,7 +55,7 @@ export function generateWeek(weekStart: IsoDate, params: PlanParams, seed: numbe
     recipes: plannerRecipes(db),
     slots,
     params,
-    recent: repo.recentRecipes(weekStart, 14, db),
+    recent: recentFor(weekStart, db),
     // Lo que había en cada hueco antes de regenerar, para no repetirlo.
     previous: meta.map((m) => previous.find((p) => p.date === m.date && p.meal === m.meal)?.recipeId ?? null),
     seed,
@@ -71,7 +82,7 @@ export function regenerateSlot(slotId: string, seed: number, db: AppDb = getDb()
   const index = plan.slots.findIndex((s) => s.id === slotId);
   const slots: PlannerSlot[] = plan.slots.map((s) => ({ date: s.date, meal: s.meal, weekend: isWeekend(s.date) }));
   const next = replanSlot(
-    { recipes: plannerRecipes(db), slots, params: plan.params, recent: repo.recentRecipes(plan.weekStart, 14, db), seed },
+    { recipes: plannerRecipes(db), slots, params: plan.params, recent: recentFor(plan.weekStart, db), seed },
     plan.slots.map((s) => s.recipeId),
     index,
   );

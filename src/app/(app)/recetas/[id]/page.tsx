@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { Clock, ExternalLink, Flame, Timer, Users } from "lucide-react";
+import { Clock, ExternalLink, Flame, NotebookPen, Timer, Users } from "lucide-react";
+import { CookedButton } from "@/components/history/cooked-button";
+import { StarRating } from "@/components/ui/star-rating";
 import { ListGroup } from "@/components/ui/list";
 import { PageHeader } from "@/components/ui/page-header";
 import { DeleteRecipeButton, FavoriteButton, RatingControl } from "@/components/recipes/recipe-controls";
@@ -10,7 +12,12 @@ import { RecipePhoto } from "@/components/recipes/recipe-photo";
 import { formatQuantity } from "@/lib/domain/quantity";
 import { formatMinutes, SOURCE_LABELS, tagLabel, totalMinutes, type IngredientInput } from "@/lib/domain/recipe";
 import { unitLabel } from "@/lib/domain/units";
+import { logsForRecipe } from "@/lib/history/repo";
 import { fetchRecipe } from "@/lib/recipes/queries";
+
+/** "3 de noviembre de 2026" */
+const longDate = (iso: string) =>
+  new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
 
 export const metadata: Metadata = { title: "Receta" };
 
@@ -44,6 +51,8 @@ async function RecipeDetail({ params }: { params: Params }) {
   const { id } = await params;
   const r = await fetchRecipe(id);
   if (!r) notFound();
+  const logs = logsForRecipe(r.id);
+  const lastNote = logs.find((l) => l.notes);
 
   const total = totalMinutes(r);
   const meta = [
@@ -95,6 +104,17 @@ async function RecipeDetail({ params }: { params: Params }) {
         )}
       </div>
 
+      {/* Lo apuntado la última vez, a la vista antes de empezar */}
+      {lastNote && (
+        <div className="mb-6 flex gap-3 rounded-2xl bg-terra-soft p-4">
+          <NotebookPen className="mt-0.5 size-5 shrink-0 text-terra" />
+          <div className="min-w-0 text-[15px] leading-snug">
+            <p className="font-semibold">Tu nota del {longDate(lastNote.cookedOn)}</p>
+            <p className="mt-0.5">«{lastNote.notes}»</p>
+          </div>
+        </div>
+      )}
+
       {r.ingredients.length > 0 &&
         groupIngredients(r.ingredients).map((g, gi) => (
           <ListGroup key={gi} header={g.label ?? (gi === 0 ? "Ingredientes" : undefined)}>
@@ -135,6 +155,24 @@ async function RecipeDetail({ params }: { params: Params }) {
             <span className="text-[15px] text-muted">{SOURCE_LABELS[r.sourceType]}</span>
             <ExternalLink className="size-4 text-muted" />
           </a>
+        </ListGroup>
+      )}
+
+      <div className="mb-7">
+        <CookedButton recipe={{ id: r.id, title: r.title }} />
+      </div>
+
+      {logs.length > 0 && (
+        <ListGroup header={`Cuando la cocinaste · ${logs.length}`}>
+          {logs.slice(0, 10).map((l) => (
+            <div key={l.id} className="px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[15px]">{longDate(l.cookedOn)}</span>
+                {l.rating && <StarRating value={l.rating} size="sm" />}
+              </div>
+              {l.notes && <p className="mt-1 text-[15px] leading-snug text-muted">«{l.notes}»</p>}
+            </div>
+          ))}
         </ListGroup>
       )}
 

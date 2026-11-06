@@ -6,6 +6,7 @@ import { addDays, dayLabel, isIsoDate, isWeekend, mondayOf, todayIso, weekDays, 
 import { classifyRecipe, type Category, type Meal, type PlanParams } from "@/lib/domain/menu";
 import { warningsFor } from "@/lib/domain/menu-planner";
 import { totalMinutes } from "@/lib/domain/recipe";
+import { cookedSlotIds } from "@/lib/history/repo";
 import { plannerRecipes } from "./service";
 import * as repo from "./repo";
 
@@ -22,6 +23,8 @@ export interface SlotView {
   date: IsoDate;
   meal: Meal;
   locked: boolean;
+  /** Ya marcado como cocinado. */
+  cooked: boolean;
   freeText: string | null;
   recipe: MenuRecipe | null;
 }
@@ -68,6 +71,7 @@ export async function loadMenuView(weekParam: string | undefined): Promise<MenuV
   if (plan) {
     const stats: Partial<Record<Category, number>> = {};
     const cost = { total: 0, priced: 0, dishes: 0 };
+    const cooked = cookedSlotIds(plan.slots.map((s) => s.id));
     const slotsView: SlotView[] = plan.slots.map((s) => {
       const recipe = s.recipeId ? (byId.get(s.recipeId) ?? null) : null;
       if (recipe) {
@@ -79,7 +83,7 @@ export async function loadMenuView(weekParam: string | undefined): Promise<MenuV
           cost.priced++;
         }
       }
-      return { id: s.id, date: s.date, meal: s.meal, locked: s.locked, freeText: s.freeText, recipe };
+      return { id: s.id, date: s.date, meal: s.meal, locked: s.locked, cooked: cooked.has(s.id), freeText: s.freeText, recipe };
     });
     const warnings = warningsFor(
       {
