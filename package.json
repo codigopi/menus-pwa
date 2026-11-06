@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "typecheck": "tsc --noEmit",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "platos": "node scripts/cargar-platos.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",

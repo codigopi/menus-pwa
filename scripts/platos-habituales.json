@@ -1,0 +1,230 @@
+{
+  "_nota": "Platos habituales de la casa (versión casera estándar; edítalos en la app a vuestro gusto). Ingredientes: [cantidad, unidad, nombre, nota]. Raciones: 4.",
+  "recetas": [
+    {
+      "title": "Judías verdes con patata y zanahoria",
+      "tags": ["primero", "comida", "verdura"],
+      "prep": 10, "cook": 25,
+      "ingredients": [[600, "g", "judías verdes"], [2, null, "patatas"], [2, null, "zanahorias"], [1, "diente", "ajo"], [3, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Limpiar y trocear las judías, las patatas y las zanahorias.", "Cocer todo en agua con sal unos 20 minutos, hasta que esté tierno.", "Escurrir y rehogar con el ajo laminado en el aceite un par de minutos."]
+    },
+    {
+      "title": "Judías verdes con bacon",
+      "tags": ["primero", "comida", "verdura"],
+      "prep": 10, "cook": 25,
+      "ingredients": [[600, "g", "judías verdes"], [2, null, "patatas"], [150, "g", "bacon", "en tiras"], [2, "diente", "ajo"], [2, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Cocer las judías y las patatas troceadas en agua con sal unos 20 minutos.", "Dorar el bacon con el ajo en el aceite.", "Escurrir la verdura y saltearla con el bacon."]
+    },
+    {
+      "title": "Judías verdes con chorizo",
+      "tags": ["primero", "comida", "verdura"],
+      "prep": 10, "cook": 25,
+      "ingredients": [[600, "g", "judías verdes"], [2, null, "patatas"], [150, "g", "chorizo", "en rodajas"], [1, "diente", "ajo"], [2, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Cocer las judías y las patatas troceadas en agua con sal unos 20 minutos.", "Sofreír el chorizo con el ajo en el aceite.", "Escurrir la verdura y mezclarla con el chorizo."]
+    },
+    {
+      "title": "Lentejas",
+      "tags": ["primero", "comida", "legumbres", "cuchara"],
+      "prep": 15, "cook": 45,
+      "ingredients": [[400, "g", "lentejas pardinas"], [1, null, "cebolla"], [1, null, "zanahoria"], [1, null, "pimiento verde"], [2, "diente", "ajo"], [1, null, "patata"], [100, "g", "chorizo"], [1, "cdta", "pimentón"], [1, "hoja", "laurel"], [3, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Sofreír la cebolla, el pimiento, la zanahoria y el ajo picados.", "Añadir el pimentón, el chorizo, las lentejas, la patata troceada y el laurel.", "Cubrir de agua y cocer a fuego suave unos 40 minutos. Salar al final."]
+    },
+    {
+      "title": "Pipos",
+      "tags": ["primero", "comida"],
+      "prep": null, "cook": null,
+      "ingredients": [],
+      "steps": [],
+      "description": "Pendiente de completar ingredientes y pasos."
+    },
+    {
+      "title": "Judías blancas",
+      "tags": ["primero", "comida", "legumbres", "cuchara"],
+      "prep": 15, "cook": 90,
+      "ingredients": [[400, "g", "alubias blancas", "en remojo la noche anterior"], [1, null, "cebolla"], [1, null, "pimiento verde"], [1, null, "tomate"], [2, "diente", "ajo"], [1, "hoja", "laurel"], [1, "cdta", "pimentón"], [3, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Poner las alubias en remojo la noche anterior.", "Cocerlas en agua fría con la cebolla, el pimiento, el tomate, el ajo y el laurel, a fuego suave, asustándolas con agua fría un par de veces.", "Hacer un sofrito con el aceite y el pimentón y añadirlo. Salar al final."]
+    },
+    {
+      "title": "Sopa de cocido",
+      "tags": ["primero", "comida", "cuchara", "aprovechamiento"],
+      "prep": 5, "cook": 10,
+      "ingredients": [[1500, "ml", "caldo de cocido"], [150, "g", "fideos finos"], [null, null, "sal"]],
+      "steps": ["Calentar el caldo del cocido.", "Cuando hierva, echar los fideos y cocer el tiempo que indique el paquete.", "Rectificar de sal y servir."]
+    },
+    {
+      "title": "Paella con pollo",
+      "tags": ["plato único", "comida", "arroz"],
+      "prep": 15, "cook": 45,
+      "ingredients": [[400, "g", "arroz"], [600, "g", "pollo troceado"], [200, "g", "judías verdes", "planas"], [1, null, "tomate", "rallado"], [1, null, "pimiento rojo"], [1200, "ml", "agua"], [1, "sobre", "colorante"], [1, "cdta", "pimentón"], [6, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Dorar el pollo salpimentado en la paellera con el aceite.", "Añadir el pimiento y las judías, y luego el tomate y el pimentón.", "Echar el agua y el colorante y cocer 10 minutos.", "Añadir el arroz repartido y cocer 18 minutos sin remover. Reposar 5 minutos."]
+    },
+    {
+      "title": "Arroz tres delicias",
+      "tags": ["primero", "comida", "arroz"],
+      "prep": 10, "cook": 25,
+      "ingredients": [[300, "g", "arroz"], [150, "g", "jamón cocido", "en dados"], [2, null, "huevos"], [150, "g", "guisantes"], [1, null, "zanahoria", "en dados"], [2, "cda", "salsa de soja"], [2, "cda", "aceite de girasol"], [null, null, "sal"]],
+      "steps": ["Cocer el arroz y escurrirlo.", "Hacer una tortilla fina con los huevos y cortarla en tiras.", "Saltear la zanahoria y los guisantes, añadir el jamón, el arroz y la tortilla.", "Aliñar con la salsa de soja."]
+    },
+    {
+      "title": "Pasta con carne picada",
+      "tags": ["primero", "comida", "pasta"],
+      "prep": 10, "cook": 25,
+      "ingredients": [[400, "g", "macarrones"], [400, "g", "carne picada"], [1, null, "cebolla"], [400, "g", "tomate frito"], [100, "g", "queso rallado"], [2, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Cocer la pasta en agua con sal.", "Pochar la cebolla, añadir la carne y dorarla.", "Agregar el tomate frito, mezclar con la pasta y servir con queso rallado."]
+    },
+    {
+      "title": "Pasta con chorizo",
+      "tags": ["primero", "comida", "pasta"],
+      "prep": 10, "cook": 20,
+      "ingredients": [[400, "g", "macarrones"], [150, "g", "chorizo"], [1, null, "cebolla"], [400, "g", "tomate frito"], [80, "g", "queso rallado"], [2, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Cocer la pasta en agua con sal.", "Pochar la cebolla y sofreír el chorizo troceado.", "Añadir el tomate frito, mezclar con la pasta y servir con queso rallado."]
+    },
+    {
+      "title": "Pasta con bacon",
+      "tags": ["primero", "comida", "pasta"],
+      "prep": 5, "cook": 20,
+      "ingredients": [[400, "g", "espaguetis"], [200, "g", "bacon", "en tiras"], [200, "ml", "nata"], [1, null, "cebolla"], [80, "g", "queso rallado"], [1, "cda", "aceite de oliva"], [null, null, "pimienta"], [null, null, "sal"]],
+      "steps": ["Cocer la pasta en agua con sal.", "Dorar el bacon y la cebolla picada.", "Añadir la nata, dejar espesar un par de minutos y mezclar con la pasta y el queso."]
+    },
+    {
+      "title": "Lomo adobado a la plancha",
+      "tags": ["segundo", "comida", "carne"],
+      "prep": 2, "cook": 10,
+      "ingredients": [[600, "g", "lomo adobado", "en filetes"], [1, "cda", "aceite de oliva"]],
+      "steps": ["Calentar bien la plancha con unas gotas de aceite.", "Hacer los filetes 2 minutos por cada lado."]
+    },
+    {
+      "title": "Pechugas de pollo empanadas",
+      "tags": ["segundo", "comida", "carne"],
+      "prep": 10, "cook": 15,
+      "ingredients": [[600, "g", "pechuga de pollo", "en filetes"], [2, null, "huevos"], [150, "g", "pan rallado"], [1, "diente", "ajo"], [null, null, "perejil"], [150, "ml", "aceite de girasol", "para freír"], [null, null, "sal"]],
+      "steps": ["Salar los filetes y pasarlos por huevo batido con ajo y perejil picados.", "Rebozarlos en pan rallado.", "Freírlos en aceite caliente hasta que estén dorados y escurrirlos."]
+    },
+    {
+      "title": "Filetes de ternera empanados",
+      "tags": ["segundo", "comida", "carne"],
+      "prep": 10, "cook": 10,
+      "ingredients": [[600, "g", "filetes de ternera"], [2, null, "huevos"], [150, "g", "pan rallado"], [1, "diente", "ajo"], [null, null, "perejil"], [150, "ml", "aceite de girasol", "para freír"], [null, null, "sal"]],
+      "steps": ["Salar los filetes y pasarlos por huevo batido con ajo y perejil picados.", "Rebozarlos en pan rallado.", "Freírlos en aceite caliente y escurrirlos."]
+    },
+    {
+      "title": "Filetes de solomillo de cerdo",
+      "tags": ["segundo", "comida", "carne"],
+      "prep": 5, "cook": 12,
+      "ingredients": [[600, "g", "solomillo de cerdo", "en medallones"], [2, "diente", "ajo"], [2, "cda", "aceite de oliva"], [null, null, "pimienta"], [null, null, "sal"]],
+      "steps": ["Salpimentar los medallones.", "Dorar el ajo laminado en el aceite y sacarlo.", "Hacer los medallones a fuego fuerte 3 minutos por lado y servir con el ajo."]
+    },
+    {
+      "title": "Lubina al horno",
+      "tags": ["segundo", "comida", "pescado", "horno"],
+      "prep": 10, "cook": 30,
+      "ingredients": [[2, null, "lubinas", "limpias"], [2, null, "patatas"], [1, null, "cebolla"], [1, null, "limón"], [2, "diente", "ajo"], [4, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Hornear las patatas y la cebolla en rodajas con aceite y sal 15 minutos a 200 °C.", "Poner encima las lubinas con rodajas de limón y ajo.", "Hornear 15 minutos más."]
+    },
+    {
+      "title": "Gallo a la plancha",
+      "tags": ["segundo", "comida", "pescado"],
+      "prep": 5, "cook": 10,
+      "ingredients": [[4, null, "gallos", "limpios"], [2, "diente", "ajo"], [null, null, "perejil"], [1, null, "limón"], [3, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Salar el pescado y hacerlo a la plancha 3–4 minutos por lado.", "Servir con un aliño de aceite, ajo y perejil picados y unas gotas de limón."]
+    },
+    {
+      "title": "Merluza a la plancha",
+      "tags": ["segundo", "comida", "pescado"],
+      "prep": 5, "cook": 12,
+      "ingredients": [[600, "g", "merluza", "en lomos"], [2, "diente", "ajo"], [null, null, "perejil"], [1, null, "limón"], [3, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Salar los lomos y hacerlos a la plancha, primero por la piel.", "Servir con un aliño de aceite, ajo y perejil y unas gotas de limón."]
+    },
+    {
+      "title": "Dorada al horno",
+      "tags": ["segundo", "comida", "pescado", "horno"],
+      "prep": 10, "cook": 30,
+      "ingredients": [[2, null, "doradas", "limpias"], [2, null, "patatas"], [1, null, "cebolla"], [1, null, "limón"], [2, "diente", "ajo"], [4, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Hornear las patatas y la cebolla en rodajas con aceite y sal 15 minutos a 200 °C.", "Poner encima las doradas con rodajas de limón y ajo.", "Hornear 15 minutos más."]
+    },
+    {
+      "title": "Tortilla de patata",
+      "tags": ["cena", "huevos"],
+      "prep": 15, "cook": 25,
+      "ingredients": [[6, null, "huevos"], [600, "g", "patatas"], [1, null, "cebolla"], [200, "ml", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Pochar las patatas y la cebolla en láminas en el aceite a fuego medio.", "Escurrir y mezclar con los huevos batidos y sal.", "Cuajar en la sartén por los dos lados."]
+    },
+    {
+      "title": "Sándwich",
+      "tags": ["cena", "rápida"],
+      "prep": 5, "cook": 5,
+      "ingredients": [[8, "rebanada", "pan de molde"], [4, "loncha", "jamón cocido"], [4, "loncha", "queso"], [20, "g", "mantequilla"]],
+      "steps": ["Montar los sándwiches con el jamón y el queso.", "Untar el exterior con mantequilla y tostarlos en la sartén o sandwichera."]
+    },
+    {
+      "title": "Pizza",
+      "tags": ["cena", "horno"],
+      "prep": 10, "cook": 15,
+      "ingredients": [[2, null, "masa de pizza"], [200, "g", "tomate frito"], [250, "g", "mozzarella"], [150, "g", "jamón cocido"], [null, null, "orégano"]],
+      "steps": ["Extender el tomate sobre la masa.", "Añadir el jamón, la mozzarella y el orégano.", "Hornear a 220 °C unos 12–15 minutos."]
+    },
+    {
+      "title": "Kebabs",
+      "tags": ["cena"],
+      "prep": 10, "cook": 15,
+      "ingredients": [[4, null, "pan de pita"], [500, "g", "pollo", "en tiras"], [1, null, "lechuga"], [2, null, "tomates"], [1, null, "cebolla"], [150, "g", "salsa de yogur"], [1, "cdta", "comino"], [null, null, "sal"]],
+      "steps": ["Saltear el pollo con el comino y sal hasta que esté dorado.", "Calentar el pan de pita.", "Rellenar con el pollo, la lechuga, el tomate, la cebolla y la salsa de yogur."]
+    },
+    {
+      "title": "Alitas de pollo con patatas",
+      "tags": ["cena", "horno"],
+      "prep": 10, "cook": 40,
+      "ingredients": [[1, "kg", "alitas de pollo"], [4, null, "patatas"], [2, "diente", "ajo"], [1, "cdta", "pimentón"], [3, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Aliñar las alitas con ajo, pimentón, aceite y sal.", "Ponerlas en la bandeja con las patatas en gajos.", "Hornear a 200 °C unos 40 minutos, dándoles la vuelta a mitad."]
+    },
+    {
+      "title": "Libritos de lomo",
+      "tags": ["cena"],
+      "prep": 15, "cook": 15,
+      "ingredients": [[8, "filete", "lomo de cerdo", "finos"], [8, "loncha", "jamón cocido"], [8, "loncha", "queso"], [2, null, "huevos"], [150, "g", "pan rallado"], [150, "ml", "aceite de girasol", "para freír"], [null, null, "sal"]],
+      "steps": ["Rellenar cada filete con una loncha de jamón y otra de queso y doblarlo.", "Pasar por huevo batido y pan rallado.", "Freír en aceite caliente hasta que estén dorados."]
+    },
+    {
+      "title": "Hamburguesas de pescado",
+      "tags": ["cena", "pescado"],
+      "prep": 5, "cook": 10,
+      "ingredients": [[4, null, "hamburguesas de pescado"], [4, null, "pan de hamburguesa"], [1, null, "lechuga"], [1, null, "tomate"], [2, "cda", "mayonesa"]],
+      "steps": ["Hacer las hamburguesas a la plancha o en la sartén.", "Montarlas en el pan con lechuga, tomate y mayonesa."]
+    },
+    {
+      "title": "Nuggets de pollo con patatas",
+      "tags": ["cena", "rápida"],
+      "prep": 5, "cook": 20,
+      "ingredients": [[500, "g", "nuggets de pollo"], [600, "g", "patatas"], [200, "ml", "aceite de girasol", "para freír"], [null, null, "sal"]],
+      "steps": ["Freír las patatas cortadas en bastones.", "Freír u hornear los nuggets según el paquete.", "Servir juntos."]
+    },
+    {
+      "title": "Pollo con champiñones",
+      "tags": ["cena"],
+      "prep": 10, "cook": 25,
+      "ingredients": [[600, "g", "pechuga de pollo", "en dados"], [300, "g", "champiñones", "laminados"], [1, null, "cebolla"], [2, "diente", "ajo"], [100, "ml", "vino blanco"], [3, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Dorar el pollo salpimentado y reservar.", "Pochar la cebolla y el ajo, añadir los champiñones.", "Volver a poner el pollo, regar con el vino y cocer 10 minutos."]
+    },
+    {
+      "title": "Patatas con salchichas",
+      "tags": ["cena"],
+      "prep": 10, "cook": 25,
+      "ingredients": [[800, "g", "patatas"], [8, null, "salchichas"], [1, null, "cebolla"], [3, "cda", "aceite de oliva"], [null, null, "sal"]],
+      "steps": ["Freír o pochar las patatas en dados con la cebolla.", "Añadir las salchichas troceadas y dorarlas.", "Salar y servir."]
+    },
+    {
+      "title": "Hamburguesa",
+      "tags": ["cena"],
+      "prep": 5, "cook": 10,
+      "ingredients": [[4, null, "hamburguesas"], [4, null, "pan de hamburguesa"], [4, "loncha", "queso"], [1, null, "tomate"], [1, null, "lechuga"], [1, null, "cebolla"], [null, null, "ketchup"]],
+      "steps": ["Hacer las hamburguesas a la plancha y fundir el queso encima.", "Tostar el pan.", "Montar con lechuga, tomate, cebolla y ketchup."]
+    },
+    {
+      "title": "Perrito caliente",
+      "tags": ["cena", "rápida"],
+      "prep": 5, "cook": 5,
+      "ingredients": [[8, null, "salchichas", "tipo Frankfurt"], [8, null, "pan de perrito"], [null, null, "ketchup"], [null, null, "mostaza"], [null, null, "cebolla frita"]],
+      "steps": ["Calentar las salchichas en agua o a la plancha.", "Ponerlas en el pan con ketchup, mostaza y cebolla frita."]
+    }
+  ]
+}

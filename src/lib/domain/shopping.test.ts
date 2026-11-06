@@ -140,3 +140,16 @@ describe("manualEntry", () => {
     ["6 huevos", { name: "huevos", amount: "6 uds", section: "lacteos" }],
   ])("%s", (text, expected) => expect(manualEntry(text)).toMatchObject(expected));
 });
+
+describe("productos habituales de la casa", () => {
+  it.each([
+    ["gallo", "pescaderia"],
+    ["pan de hamburguesa", "panaderia"],
+    ["pan de perrito", "panaderia"],
+    ["nuggets de pollo", "congelados"],
+    ["hamburguesas de pescado", "congelados"],
+    ["hamburguesas", "carniceria"],
+    ["masa de pizza", "lacteos"],
+    ["ketchup", "despensa"],
+  ])("%s → %s", (name, section) => expect(sectionFor(name)).toBe(section));
+});

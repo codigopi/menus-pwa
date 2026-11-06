@@ -188,8 +188,9 @@ describe("planWeek", () => {
     expect(empty.warnings[0]).toContain("Aún no tienes recetas");
   });
 
-  it("allowedRecipes descarta recetas sin ingredientes", () => {
+  it("allowedRecipes descarta recetas sin ingredientes y postres", () => {
     expect(allowedRecipes([rec("vacia", [])], params())).toEqual([]);
+    expect(allowedRecipes([rec("brownie", ["chocolate", "huevos"], { tags: ["postre"] })], params())).toEqual([]);
   });
 });
 

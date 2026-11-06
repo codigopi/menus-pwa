@@ -135,6 +135,7 @@ export const CATALOG: CatalogEntry[] = [
   E("dorada", "pescaderia", { gramsPerUnit: 400, buyBy: "unit", pricePerKg: 9 }),
   E("lubina", "pescaderia", { gramsPerUnit: 400, buyBy: "unit", pricePerKg: 10 }),
   E("rape", "pescaderia", { pricePerKg: 18 }),
+  E("gallo", "pescaderia", { gramsPerUnit: 300, buyBy: "unit", pricePerKg: 12 }),
   E("gamba", "pescaderia", { pricePerKg: 15 }),
   E("langostino", "pescaderia", { pricePerKg: 14 }),
   E("mejillon", "pescaderia", { pricePerKg: 4 }),
@@ -158,6 +159,10 @@ export const CATALOG: CatalogEntry[] = [
   // Panadería
   E("pan", "panaderia", { gramsPerUnit: 250, buyBy: "unit", pricePerUnit: 1 }),
   E("pan molde", "panaderia", { pricePerUnit: 1.8 }),
+  E("pan hamburguesa", "panaderia", { gramsPerUnit: 60, buyBy: "unit", pricePerUnit: 0.4 }),
+  E("pan perrito", "panaderia", { gramsPerUnit: 50, buyBy: "unit", pricePerUnit: 0.35 }),
+  E("pan pita", "panaderia", { gramsPerUnit: 70, buyBy: "unit", pricePerUnit: 0.4 }),
+  E("masa pizza", "lacteos", { buyBy: "unit", pricePerUnit: 1.5 }),
   // Despensa
   E("arroz", "despensa", { pricePerKg: 1.6 }),
   E("pasta", "despensa", { pricePerKg: 1.6 }),
@@ -218,8 +223,13 @@ export const CATALOG: CatalogEntry[] = [
   E("azafran", "especias", { pricePerUnit: 3 }),
   E("colorante", "especias", { pricePerUnit: 1 }),
   E("guindilla", "especias", { pricePerKg: 30 }),
+  E("ketchup", "despensa", { pricePerKg: 4 }),
+  E("salsa yogur", "despensa", { pricePerKg: 6 }),
+  E("cebolla frita", "despensa", { pricePerKg: 10 }),
   // Congelados
   E("guisante", "congelados", { pricePerKg: 3 }),
+  E("nugget", "congelados", { pricePerKg: 7 }),
+  E("hamburguesa pescado", "congelados", { gramsPerUnit: 100, buyBy: "unit", pricePerUnit: 0.8 }),
 ];
 
 /** Palabras que delatan conserva aunque el ingrediente no esté en el catálogo. */

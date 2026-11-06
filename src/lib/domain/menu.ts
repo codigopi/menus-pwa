@@ -57,7 +57,7 @@ const KEYWORDS: Record<Exclude<Category, "verdura">, string[]> = {
   legumbre: ["lenteja", "garbanzo", "alubia", "judion", "haba", "soja", "guisante", "hummus", "fabe"],
   pescado: [
     "pescado", "merluza", "bacalao", "salmon", "atun", "bonito", "sardina", "boqueron", "caballa", "gamba", "langostino",
-    "mejillon", "almeja", "calamar", "sepia", "pulpo", "rape", "dorada", "lubina", "trucha", "lenguado", "marisco", "chipiron", "anchoa", "pota",
+    "mejillon", "almeja", "calamar", "sepia", "pulpo", "rape", "dorada", "lubina", "gallo", "trucha", "lenguado", "marisco", "chipiron", "anchoa", "pota",
   ],
   carne: [
     "pollo", "pavo", "ternera", "vaca", "buey", "cerdo", "cordero", "conejo", "carne", "chorizo", "jamon", "bacon", "beicon",

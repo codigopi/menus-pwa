@@ -80,6 +80,7 @@ const CHEAP: Category[] = ["legumbre", "huevo", "pasta_arroz", "verdura"];
 export function allowedRecipes<R extends PlannerRecipe>(recipes: R[], params: PlanParams): R[] {
   return recipes.filter((r) => {
     if (r.ingredients.length === 0) return false; // sin ingredientes no sabemos qué es
+    if (r.tags.includes("postre")) return false; // los postres no son comida ni cena
     if (params.vegetarian && hasMeatOrFish(r)) return false;
     if (params.avoid.some((a) => r.ingredients.some((i) => ingredientMatches(a, i.name)))) return false;
     return true;
