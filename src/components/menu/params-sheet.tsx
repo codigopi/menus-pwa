@@ -8,7 +8,7 @@ import { Segmented } from "@/components/ui/segmented";
 import { Sheet } from "@/components/ui/sheet";
 import { Stepper } from "@/components/ui/stepper";
 import { Switch } from "@/components/ui/switch";
-import { MEAL_LABELS, MEALS, type Meal, type PlanParams } from "@/lib/domain/menu";
+import { familyLabel, MEAL_LABELS, MEALS, type Meal, type PlanParams } from "@/lib/domain/menu";
 
 const TIME_OPTIONS: (number | null)[] = [20, 30, 45, 60, 90, null];
 const timeLabel = (m: number | null) => (m === null ? "Sin límite" : `Hasta ${m} min`);
@@ -23,7 +23,7 @@ function mealsSummary(p: PlanParams): string {
 /** Resumen corto de los parámetros: "2 personas · comida (1º y 2º) y cena · ≤45 min". */
 export function paramsSummary(p: PlanParams): string {
   const parts = [
-    `${p.people} ${p.people === 1 ? "persona" : "personas"}`,
+    familyLabel(p),
     mealsSummary(p),
   ];
   if (p.maxMinutesWeekday) parts.push(`≤${p.maxMinutesWeekday} min entre semana`);
@@ -88,8 +88,15 @@ export function ParamsSheet({
 
         <div className="mx-3 divide-y divide-hairline overflow-hidden rounded-2xl bg-card">
           <div className={row}>
-            <span className="text-[17px]">Personas</span>
-            <Stepper value={p.people} onChange={(v) => set("people", v)} min={1} max={20} label="Personas" />
+            <span className="text-[17px]">Adultos</span>
+            <Stepper value={p.adults} onChange={(v) => set("adults", v)} min={1} max={12} label="Adultos" />
+          </div>
+          <div className={row}>
+            <span className="text-[17px]">
+              Niños
+              <span className="block text-[12px] text-muted">Ración algo menor · sin pescados con mercurio</span>
+            </span>
+            <Stepper value={p.children} onChange={(v) => set("children", v)} min={0} max={12} label="Niños" />
           </div>
           <div className={row}>
             <span className="text-[17px]">Planificar</span>

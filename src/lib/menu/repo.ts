@@ -7,7 +7,7 @@ import { and, asc, desc, eq, gte, inArray, isNotNull, lt } from "drizzle-orm";
 import { getDb, type AppDb } from "@/lib/db";
 import { mealPlans, mealSlots } from "@/lib/db/schema";
 import { addDays, daysBetween, type IsoDate } from "@/lib/domain/dates";
-import { DEFAULT_PARAMS, type Course, type Meal, type PlanParams } from "@/lib/domain/menu";
+import { DEFAULT_PARAMS, normalizeParams, type Course, type Meal, type PlanParams } from "@/lib/domain/menu";
 import { getSetting, setSetting } from "@/lib/settings";
 
 export interface SlotRow {
@@ -56,7 +56,7 @@ export function getPlan(weekStart: IsoDate, db: AppDb = getDb()): PlanRow | null
   return {
     id: plan.id,
     weekStart: plan.weekStart,
-    params: { ...DEFAULT_PARAMS, ...plan.params },
+    params: normalizeParams(plan.params),
     singleCourseDays: plan.singleCourseDays,
     slots,
   };
@@ -70,9 +70,9 @@ const PARAMS_KEY = "menu.params";
  */
 export function latestParams(db: AppDb = getDb()): PlanParams {
   const saved = getSetting<Partial<PlanParams>>(PARAMS_KEY, db);
-  if (saved) return { ...DEFAULT_PARAMS, ...saved };
+  if (saved) return normalizeParams(saved);
   const last = db.select({ params: mealPlans.params }).from(mealPlans).orderBy(desc(mealPlans.weekStart)).limit(1).get();
-  return last ? { ...DEFAULT_PARAMS, ...last.params } : DEFAULT_PARAMS;
+  return last ? normalizeParams(last.params) : DEFAULT_PARAMS;
 }
 
 /** Guarda los ajustes como preferencia y, si hay menú esa semana, en el menú (sin regenerarlo). */

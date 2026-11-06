@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { addDays, dayLabel, daysBetween, isIsoDate, isWeekend, mondayOf, todayIso, weekDays, weekRangeLabel } from "./dates";
 import { classifyRecipe, courseRole, DEFAULT_PARAMS, fitsMeal, hasMeatOrFish, isWholeMeal, type Meal, type PlanParams } from "./menu";
 import { allowedRecipes, planWeek, replanSlot, type PlannerRecipe, type PlannerSlot } from "./menu-planner";
+import { nutritionFlags, weeklyBalance } from "./nutrition";
 
 // ---------------------------------------------------------------- fechas
 
@@ -156,9 +157,9 @@ describe("planWeek", () => {
   });
 
   it("en modo económico prefiere platos baratos según su coste", () => {
-    // Salmón y bacalao caros; el resto barato. El equilibrio sigue pidiendo
-    // pescado, así que no desaparecen, pero deben salir menos que en "normal".
-    const isExpensive = (id: string | null) => id === "salmon" || id === "bacalao";
+    // Carnes caras (la carne no tiene mínimo en la pirámide, así que el
+    // presupuesto puede reducirlas); deben salir menos que en "normal".
+    const isExpensive = (id: string | null) => id === "pollo" || id === "albondigas";
     const priced = LIBRARY.map((r) => ({ ...r, costPerServing: isExpensive(r.id) ? 6 : 1 }));
     const count = (budget: PlanParams["budget"]) =>
       [1, 2, 3, 4, 5, 6, 7, 8].reduce(
@@ -283,6 +284,73 @@ describe("primero y segundo", () => {
     const { assignments, warnings } = planWeek({ recipes: onlyFirsts, slots: courseWeek(), params: params({ maxMinutesWeekday: null }), seed: 1 });
     expect(assignments.every(Boolean)).toBe(true);
     expect(warnings.some((w) => w.includes("segundo"))).toBe(true);
+  });
+});
+
+describe("pirámide nutricional", () => {
+  // Biblioteca con tentaciones: mucha comida rápida, fritos y procesados
+  const PYRAMID: PlannerRecipe[] = [
+    ...LIBRARY.filter((r) => r.id !== "cocido"),
+    rec("pizza", ["masa de pizza", "jamón cocido", "mozzarella"], { title: "Pizza", rating: 5 }),
+    rec("nuggets", ["nuggets de pollo", "patatas"], { title: "Nuggets de pollo con patatas", rating: 5 }),
+    rec("perrito", ["salchichas", "pan de perrito"], { title: "Perrito caliente", rating: 5 }),
+    rec("hamburguesa", ["hamburguesas", "pan de hamburguesa"], { title: "Hamburguesa", rating: 5 }),
+    rec("pechugas", ["pechuga de pollo", "pan rallado"], { title: "Pechugas empanadas", rating: 5 }),
+    rec("sardinas", ["sardinas", "limón"], { title: "Sardinas al horno" }),
+    rec("espada", ["pez espada", "ajo"], { title: "Pez espada a la plancha" }),
+    rec("crema", ["calabacín", "puerro"], { title: "Crema de calabacín" }),
+    rec("espinacas", ["espinacas", "garbanzos"], { title: "Espinacas con garbanzos", tags: ["legumbres"] }),
+  ];
+  const courseWeek2 = (): PlannerSlot[] =>
+    weekDays("2026-11-02").flatMap((date) => [
+      { date, meal: "comida" as const, course: "primero" as const, weekend: isWeekend(date) },
+      { date, meal: "comida" as const, course: "segundo" as const, weekend: isWeekend(date) },
+      { date, meal: "cena" as const, course: "unico" as const, weekend: isWeekend(date) },
+    ]);
+
+  it("respeta las frecuencias recomendadas aunque la comida rápida esté mejor valorada", () => {
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const slots = courseWeek2();
+      const { assignments } = planWeek({ recipes: PYRAMID, slots, params: params({ maxMinutesWeekday: null, children: 3 }), seed });
+      const dishes = assignments.map((id, i) => ({ date: slots[i].date, meal: slots[i].meal, flags: nutritionFlags(PYRAMID.find((r) => r.id === id)!) }));
+      const bad = weeklyBalance(dishes).filter((r) => r.status === "alto");
+      expect(bad.map((b) => `${b.id}=${b.count}`), `semilla ${seed}`).toEqual([]);
+      // Legumbre y pescado, en su rango
+      const byId = Object.fromEntries(weeklyBalance(dishes).map((r) => [r.id, r]));
+      expect(byId.legumbre.count).toBeGreaterThanOrEqual(3);
+      expect(byId.pescado.count).toBeGreaterThanOrEqual(3);
+      expect(byId.pescado_azul.count).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it("con pocas legumbres en la biblioteca, repite alguna para llegar al mínimo", () => {
+    // Solo 2 recetas de legumbre: para llegar a 3 hay que repetir una
+    const few = LIBRARY.filter((r) => !["garbanzos", "alubias", "cocido"].includes(r.id)).concat(rec("garbanzos", ["garbanzos", "espinacas"]));
+    const slots = courseWeek2();
+    const { assignments } = planWeek({ recipes: few, slots, params: params({ maxMinutesWeekday: null }), seed: 2 });
+    const dishes = assignments.map((id, i) => ({ date: slots[i].date, meal: slots[i].meal, flags: nutritionFlags(few.find((r) => r.id === id)!) }));
+    expect(weeklyBalance(dishes).find((r) => r.id === "legumbre")!.count).toBeGreaterThanOrEqual(3);
+  });
+
+  it("avisa si las legumbres no caben entre semana por tiempo", () => {
+    const slow = [rec("lentejas", ["lentejas"], { prepMinutes: 15, cookMinutes: 45 }), rec("merluza", ["merluza"]), rec("tortilla", ["huevos"])];
+    const { warnings } = planWeek({ recipes: slow, slots: week(), params: params({ maxMinutesWeekday: 45 }), seed: 1 });
+    expect(warnings.some((w) => w.includes("legumbres tardan más de 45 min"))).toBe(true);
+    const ok = planWeek({ recipes: slow, slots: week(), params: params({ maxMinutesWeekday: 90 }), seed: 1 });
+    expect(ok.warnings.some((w) => w.includes("legumbres tardan"))).toBe(false);
+  });
+
+  it("con niños, nunca pez espada; sin niños, sí puede salir", () => {
+    const withKids = allowedRecipes(PYRAMID, params({ children: 2 }));
+    expect(withKids.some((r) => r.id === "espada")).toBe(false);
+    expect(allowedRecipes(PYRAMID, params({ children: 0 })).some((r) => r.id === "espada")).toBe(true);
+  });
+
+  it("todos los días hay algún plato con verdura", () => {
+    const slots = courseWeek2();
+    const { assignments } = planWeek({ recipes: PYRAMID, slots, params: params({ maxMinutesWeekday: null }), seed: 7 });
+    const dishes = assignments.map((id, i) => ({ date: slots[i].date, meal: slots[i].meal, flags: nutritionFlags(PYRAMID.find((r) => r.id === id)!) }));
+    expect(weeklyBalance(dishes).find((r) => r.id === "verdura_diaria")?.status).toBe("ok");
   });
 });
 

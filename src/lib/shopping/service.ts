@@ -8,6 +8,7 @@ import { pantryItems, shoppingItems, shoppingLists } from "@/lib/db/schema";
 import type { IsoDate } from "@/lib/domain/dates";
 import { parseIngredientLine } from "@/lib/domain/ingredient-parser";
 import { buildShoppingList, manualEntry, type NeedLine, type PantryLine } from "@/lib/domain/shopping";
+import { portions } from "@/lib/domain/menu";
 import { getPlan } from "@/lib/menu/repo";
 import { getRecipe } from "@/lib/recipes/repo";
 
@@ -50,7 +51,8 @@ export function menuNeedLines(weekStart: IsoDate, db: AppDb = getDb()): { lines:
     const recipe = getRecipe(slot.recipeId, db);
     if (!recipe) continue;
     stamp.push(`${recipe.id}@${recipe.updatedAt.getTime()}`);
-    const factor = plan.params.people / Math.max(1, recipe.servings);
+    // Raciones equivalentes: un niño come ~0,7 de un adulto
+    const factor = portions(plan.params) / Math.max(1, recipe.servings);
     for (const ing of recipe.ingredients) {
       lines.push({
         name: ing.name,
@@ -60,7 +62,7 @@ export function menuNeedLines(weekStart: IsoDate, db: AppDb = getDb()): { lines:
       });
     }
   }
-  return { lines, recipeStamp: `${plan.params.people}|${stamp.join(",")}` };
+  return { lines, recipeStamp: `${portions(plan.params)}|${stamp.join(",")}` };
 }
 
 /** Hash corto y estable (djb2) para detectar cambios. */

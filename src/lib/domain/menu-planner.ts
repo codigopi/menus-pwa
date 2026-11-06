@@ -8,6 +8,7 @@
  */
 import { ingredientMatches } from "./matching";
 import { classifyRecipe, courseRole, fitsMeal, hasMeatOrFish, isWholeMeal, type Category, type Course, type Meal, type PlanParams } from "./menu";
+import { nutritionFlags, RULES, scaledLimits, type NutritionFlags, type Rule } from "./nutrition";
 import { totalMinutes } from "./recipe";
 
 export interface PlannerRecipe {
@@ -18,7 +19,7 @@ export interface PlannerRecipe {
   isFavorite: boolean;
   prepMinutes: number | null;
   cookMinutes: number | null;
-  ingredients: { name: string }[];
+  ingredients: { name: string; note?: string | null }[];
   /** Coste orientativo por ración en € (null si no se puede estimar). */
   costPerServing?: number | null;
   /** Encaje con los gustos de la casa (-2…+2), aprendido del histórico. */
@@ -64,17 +65,10 @@ export function rng(seed: number) {
   };
 }
 
-/** Raciones objetivo por tipo en una semana de 14 platos (se escala). */
-const TARGETS: Record<Category, { min: number; max: number }> = {
-  legumbre: { min: 2, max: 4 },
-  pescado: { min: 2, max: 4 },
-  carne: { min: 1, max: 4 },
-  huevo: { min: 1, max: 3 },
-  pasta_arroz: { min: 0, max: 3 },
-  verdura: { min: 2, max: 14 },
-};
-
 const CHEAP: Category[] = ["legumbre", "huevo", "pasta_arroz", "verdura"];
+
+/** Lo que resta cada repetición de un plato en la misma semana. */
+const REPEAT_PENALTY = 9;
 
 /** Recetas permitidas por las restricciones (vegetariano, ingredientes a evitar). */
 export function allowedRecipes<R extends PlannerRecipe>(recipes: R[], params: PlanParams): R[] {
@@ -82,6 +76,8 @@ export function allowedRecipes<R extends PlannerRecipe>(recipes: R[], params: Pl
     if (r.ingredients.length === 0) return false; // sin ingredientes no sabemos qué es
     if (r.tags.includes("postre")) return false; // los postres no son comida ni cena
     if (params.vegetarian && hasMeatOrFish(r)) return false;
+    // Con niños: nada de pescados con mucho mercurio (recomendación AESAN)
+    if (params.children > 0 && nutritionFlags(r).highMercury) return false;
     if (params.avoid.some((a) => r.ingredients.some((i) => ingredientMatches(a, i.name)))) return false;
     return true;
   });
@@ -101,6 +97,9 @@ function isLight(r: PlannerRecipe, cat: Category): boolean {
 interface Context {
   recipes: PlannerRecipe[];
   categories: Map<string, Category>;
+  flags: Map<string, NutritionFlags>;
+  /** Límites de la pirámide escalados a los días de este menú. */
+  limits: { rule: Rule; min?: number; max?: number }[];
   roles: Map<string, Course>;
   wholeMeals: Set<string>;
   slots: PlannerSlot[];
@@ -115,14 +114,24 @@ interface Context {
 function score(r: PlannerRecipe, index: number, ctx: Context): number {
   const slot = ctx.slots[index];
   const cat = ctx.categories.get(r.id)!;
-  const scale = ctx.slots.length / 14;
+  const flags = ctx.flags.get(r.id)!;
   let s = 0;
 
-  // Equilibrio semanal
-  const count = ctx.assignments.filter((id, i) => i !== index && id && ctx.categories.get(id) === cat).length;
-  const target = TARGETS[cat];
-  if (count < Math.round(target.min * scale)) s += 3;
-  if (count >= Math.max(1, Math.round(target.max * scale))) s -= 6;
+  // Pirámide nutricional: lo que aún falta suma; pasarse de lo recomendado resta
+  for (const { rule, min, max } of ctx.limits) {
+    if (!rule.counts(flags)) continue;
+    const count = ctx.assignments.filter((id, i) => i !== index && id && rule.counts(ctx.flags.get(id)!)).length;
+    if (min !== undefined && count < min) s += rule.id === "pescado_azul" ? 2 : 3;
+    // Pasarse resta, y más cuanto más se pasa
+    if (max !== undefined && count + 1 > max) s -= 8 * (count + 1 - max);
+  }
+
+  // Verdura todos los días (en comida y cena)
+  if (flags.vegetables) {
+    const dayHasVeg = ctx.slots.some((o, i) => i !== index && o.date === slot.date && ctx.assignments[i] && ctx.flags.get(ctx.assignments[i]!)!.vegetables);
+    s += dayHasVeg ? 0.5 : 2.5;
+    if (slot.meal === "cena") s += 0.5;
+  }
 
   // Variedad: mismo tipo el mismo día o en el hueco anterior/siguiente
   ctx.slots.forEach((other, i) => {
@@ -177,7 +186,6 @@ function score(r: PlannerRecipe, index: number, ctx: Context): number {
 /** Mejor receta para un hueco, dadas las demás asignaciones. */
 function pick(index: number, ctx: Context, exclude: Set<string>): string | null {
   const slot = ctx.slots[index];
-  const used = new Set(ctx.assignments.filter((id, i) => i !== index && id) as string[]);
   const usable = ctx.recipes.filter((r) => fitsTime(r, slot, ctx.params) && !exclude.has(r.id));
   // Etiquetas "comida"/"cena": recetas exclusivas de una comida (si queda alguna)
   const forMeal = usable.filter((r) => fitsMeal(r, slot.meal));
@@ -187,21 +195,35 @@ function pick(index: number, ctx: Context, exclude: Set<string>): string | null 
   const byRole = course === "unico" ? available : available.filter((r) => ctx.roles.get(r.id) === course);
   const fitting = byRole.length > 0 ? byRole : available;
 
-  // 1ª opción: recetas no usadas esta semana. Si no quedan, se permite repetir.
-  // En la cena, antes que un plato contundente sin usar (cocido, lentejas…)
-  // es mejor repetir algo ligero.
-  const unused = fitting.filter((r) => !used.has(r.id));
+  // Repetir un plato en la semana resta (más cuanto más se repite), pero no
+  // está prohibido: es mejor repetir una merluza que pasarse de embutidos.
+  const usedCount = new Map<string, number>();
+  ctx.assignments.forEach((id, i) => {
+    if (i !== index && id) usedCount.set(id, (usedCount.get(id) ?? 0) + 1);
+  });
+  // Reglas de la pirámide que aún no llegan al mínimo esta semana
+  const unmet = ctx.limits.filter(
+    ({ rule, min }) => min !== undefined && ctx.assignments.filter((id, i) => i !== index && id && rule.counts(ctx.flags.get(id)!)).length < min,
+  );
+  const repeatPenalty = (id: string) => {
+    const n = usedCount.get(id) ?? 0;
+    const sameDay = ctx.slots.some((o, i) => i !== index && o.date === slot.date && ctx.assignments[i] === id);
+    if (sameDay) return 50; // el mismo plato dos veces el mismo día, nunca
+    // Repetir para llegar a un mínimo (p. ej. lentejas dos veces para cumplir
+    // las legumbres) cuesta poco; repetir por repetir, bastante.
+    const helps = unmet.some(({ rule }) => rule.counts(ctx.flags.get(id)!));
+    return n * (helps ? REPEAT_PENALTY / 3 : REPEAT_PENALTY);
+  };
+
+  // En la cena, antes que un plato contundente (cocido, lentejas…) es mejor algo ligero.
   const heavyAtNight = (r: PlannerRecipe) =>
     ctx.categories.get(r.id) === "legumbre" || r.tags.includes("cuchara") || ctx.wholeMeals.has(r.id);
-  const pools =
-    slot.meal === "cena"
-      ? [unused.filter((r) => !heavyAtNight(r)), fitting.filter((r) => !heavyAtNight(r)), unused, fitting]
-      : [unused, fitting];
+  const pools = slot.meal === "cena" ? [fitting.filter((r) => !heavyAtNight(r)), fitting] : [fitting];
   for (const pool of pools) {
     if (pool.length === 0) continue;
     let best: { id: string; s: number } | null = null;
     for (const r of pool) {
-      const s = score(r, index, ctx) - (used.has(r.id) ? 20 : 0);
+      const s = score(r, index, ctx) - repeatPenalty(r.id);
       if (!best || s > best.s) best = { id: r.id, s };
     }
     return best!.id;
@@ -214,6 +236,8 @@ function buildContext(input: PlanInput, assignments: (string | null)[]): Context
   return {
     recipes,
     categories: new Map(input.recipes.map((r) => [r.id, classifyRecipe(r)])),
+    flags: new Map(input.recipes.map((r) => [r.id, nutritionFlags(r)])),
+    limits: RULES.filter((rule) => rule.id !== "verdura_diaria").map((rule) => ({ rule, ...scaledLimits(rule, new Set(input.slots.map((sl) => sl.date)).size || 7) })),
     roles: new Map(input.recipes.map((r) => [r.id, courseRole(r)])),
     wholeMeals: new Set(input.recipes.filter(isWholeMeal).map((r) => r.id)),
     slots: input.slots,
@@ -273,6 +297,14 @@ function planWarnings(input: PlanInput, ctx: Context): string[] {
   const available = new Set(ctx.recipes.map((r) => ctx.categories.get(r.id)));
   if (!available.has("pescado") && !input.params.vegetarian) warnings.push("No tienes recetas de pescado: añade alguna para equilibrar la semana.");
   if (!available.has("legumbre")) warnings.push("No tienes recetas de legumbres: añade alguna para equilibrar la semana.");
+  // Legumbres que no caben entre semana por tiempo: la pirámide pide 3–4
+  const weekdayMax = input.params.maxMinutesWeekday;
+  const legumes = ctx.recipes.filter((r) => ctx.categories.get(r.id) === "legumbre");
+  if (weekdayMax !== null && legumes.length > 0 && legumes.every((r) => (totalMinutes(r) ?? 0) > weekdayMax)) {
+    warnings.push(
+      `Tus legumbres tardan más de ${weekdayMax} min y solo caben el fin de semana. Para llegar a 3–4 a la semana: sube el tiempo «entre semana» en Ajustes, hazlas en olla exprés (y ajusta el tiempo de la receta) o usa legumbre cocida de bote.`,
+    );
+  }
   const courses = new Set(input.slots.map((s) => s.course ?? "unico"));
   const roles = new Set(ctx.recipes.map((r) => ctx.roles.get(r.id)));
   if (courses.has("primero") && !roles.has("primero")) warnings.push("No tienes recetas de primero (legumbres, verduras, cremas, pasta, arroz): se usan otras.");

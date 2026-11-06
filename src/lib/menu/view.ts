@@ -3,8 +3,9 @@
  */
 import { connection } from "next/server";
 import { addDays, dayLabel, isIsoDate, isWeekend, mondayOf, todayIso, weekDays, weekRangeLabel, type IsoDate } from "@/lib/domain/dates";
-import { classifyRecipe, type Category, type Course, type Meal, type PlanParams } from "@/lib/domain/menu";
+import { classifyRecipe, portions, type Category, type Course, type Meal, type PlanParams } from "@/lib/domain/menu";
 import { warningsFor } from "@/lib/domain/menu-planner";
+import { nutritionFlags, weeklyBalance, type RuleStatus } from "@/lib/domain/nutrition";
 import { totalMinutes } from "@/lib/domain/recipe";
 import { cookedSlotIds } from "@/lib/history/repo";
 import { plannerRecipes } from "./service";
@@ -26,6 +27,8 @@ export interface SlotView {
   locked: boolean;
   /** Ya marcado como cocinado. */
   cooked: boolean;
+  /** Esta comida/cena no lleva verdura: sugerir acompañar con ensalada. */
+  suggestVeg: boolean;
   freeText: string | null;
   recipe: MenuRecipe | null;
 }
@@ -48,6 +51,8 @@ export interface MenuView {
     days: DayView[];
     stats: Partial<Record<Category, number>>;
     warnings: string[];
+    /** Equilibrio frente a la pirámide nutricional. */
+    nutrition: RuleStatus[];
     /** Coste orientativo de la semana (solo platos con precio estimable). */
     cost: { total: number; priced: number; dishes: number };
   } | null;
@@ -80,11 +85,11 @@ export async function loadMenuView(weekParam: string | undefined): Promise<MenuV
         cost.dishes++;
         const cps = costById.get(recipe.id);
         if (cps != null) {
-          cost.total += cps * plan.params.people;
+          cost.total += cps * portions(plan.params);
           cost.priced++;
         }
       }
-      return { id: s.id, date: s.date, meal: s.meal, course: s.course, locked: s.locked, cooked: cooked.has(s.id), freeText: s.freeText, recipe };
+      return { id: s.id, date: s.date, meal: s.meal, course: s.course, locked: s.locked, cooked: cooked.has(s.id), suggestVeg: false, freeText: s.freeText, recipe };
     });
     const warnings = warningsFor(
       {
@@ -95,8 +100,23 @@ export async function loadMenuView(weekParam: string | undefined): Promise<MenuV
       },
       plan.slots.map((s) => s.recipeId),
     );
+    // Pirámide: señales de cada plato con receta
+    const flagsById = new Map(recipes.map((r) => [r.id, nutritionFlags(r)]));
+    const dishes = plan.slots
+      .filter((s) => s.recipeId && flagsById.has(s.recipeId))
+      .map((s) => ({ date: s.date, meal: s.meal, flags: flagsById.get(s.recipeId!)! }));
+    // Sugerir ensalada en la última fila de cada comida/cena sin verdura
+    const groups = new Map<string, SlotView[]>();
+    for (const sv of slotsView) groups.set(`${sv.date}|${sv.meal}`, [...(groups.get(`${sv.date}|${sv.meal}`) ?? []), sv]);
+    for (const group of groups.values()) {
+      const withRecipe = group.filter((g) => g.recipe);
+      if (withRecipe.length === 0) continue;
+      if (!withRecipe.some((g) => flagsById.get(g.recipe!.id)?.vegetables)) withRecipe[withRecipe.length - 1].suggestVeg = true;
+    }
+
     planView = {
       params: plan.params,
+      nutrition: weeklyBalance(dishes),
       stats,
       cost,
       warnings,

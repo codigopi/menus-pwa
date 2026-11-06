@@ -26,7 +26,9 @@ export type Course = (typeof COURSES)[number];
 export const COURSE_LABELS: Record<Course, string> = { primero: "Primero", segundo: "Segundo", unico: "Plato único" };
 
 export const planParamsSchema = z.object({
-  people: z.number().int().min(1).max(20),
+  adults: z.number().int().min(1).max(12),
+  /** Niños: comen raciones algo menores y no deben tomar pescados con mucho mercurio. */
+  children: z.number().int().min(0).max(12),
   meals: z.array(z.enum(MEALS)).min(1),
   /** Comida con primero y segundo (lo habitual) o plato único. La cena es siempre un plato. */
   lunchCourses: z.enum(["dos", "unico"]),
@@ -41,7 +43,8 @@ export const planParamsSchema = z.object({
 export type PlanParams = z.infer<typeof planParamsSchema>;
 
 export const DEFAULT_PARAMS: PlanParams = {
-  people: 2,
+  adults: 2,
+  children: 0,
   meals: ["comida", "cena"],
   lunchCourses: "dos",
   maxMinutesWeekday: 45,
@@ -50,6 +53,33 @@ export const DEFAULT_PARAMS: PlanParams = {
   vegetarian: false,
   avoid: [],
 };
+
+/** Ración de un niño respecto a la de un adulto (orientativo). */
+export const CHILD_PORTION = 0.7;
+
+/** Raciones equivalentes de la familia (2 adultos + 3 niños ≈ 4,1). */
+export function portions(p: Pick<PlanParams, "adults" | "children">): number {
+  return p.adults + p.children * CHILD_PORTION;
+}
+
+/** "2 adultos y 3 niños" */
+export function familyLabel(p: Pick<PlanParams, "adults" | "children">): string {
+  const a = `${p.adults} ${p.adults === 1 ? "adulto" : "adultos"}`;
+  return p.children ? `${a} y ${p.children} ${p.children === 1 ? "niño" : "niños"}` : a;
+}
+
+/**
+ * Ajustes guardados → ajustes actuales. Convierte el formato antiguo
+ * ("people": 5) en adultos, y completa lo que falte con los valores por defecto.
+ */
+export function normalizeParams(raw: unknown): PlanParams {
+  const r = (raw && typeof raw === "object" ? raw : {}) as Partial<PlanParams> & { people?: number };
+  const { people, ...rest } = r;
+  const merged = { ...DEFAULT_PARAMS, ...rest };
+  if (rest.adults === undefined && typeof people === "number") merged.adults = Math.max(1, Math.min(12, people));
+  const parsed = planParamsSchema.safeParse(merged);
+  return parsed.success ? parsed.data : DEFAULT_PARAMS;
+}
 
 // ---------------------------------------------------------------- clasificación
 

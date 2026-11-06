@@ -5,6 +5,7 @@ import { AI_PENDING_MESSAGE, isAiConfigured } from "@/lib/ai/config";
 import { AiError } from "@/lib/ai/recipe-extractor";
 import { generateIdeas, type Idea } from "@/lib/ai/recipe-generator";
 import { describeProfile } from "@/lib/domain/taste";
+import { portions } from "@/lib/domain/menu";
 import { latestParams } from "@/lib/menu/repo";
 import { loadTaste } from "@/lib/taste/service";
 
@@ -30,7 +31,8 @@ export async function suggestIdeas(input: z.input<typeof requestSchema>): Promis
       staples: parsed.data.staples,
       profileText: describeProfile(profile),
       existingTitles: recipes.map((r) => r.title),
-      people: params.people,
+      people: Math.max(1, Math.round(portions(params))),
+      children: params.children,
       vegetarian: params.vegetarian,
       avoid: params.avoid,
       maxMinutes: parsed.data.mode === "ingredientes" ? params.maxMinutesWeekday : null,

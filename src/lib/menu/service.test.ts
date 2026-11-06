@@ -40,7 +40,7 @@ beforeEach(() => {
 
 describe("servicio de menú", () => {
   it("por defecto: comida con primero y segundo + cena (21 platos)", () => {
-    generateWeek("2026-11-02", { ...DEFAULT_PARAMS, people: 3 }, 1, db);
+    generateWeek("2026-11-02", { ...DEFAULT_PARAMS, adults: 3 }, 1, db);
     const plan = getPlan("2026-11-02", db)!;
     expect(plan.slots).toHaveLength(21);
     expect(plan.slots.slice(0, 3)).toMatchObject([
@@ -49,7 +49,7 @@ describe("servicio de menú", () => {
       { date: "2026-11-02", meal: "cena", course: "unico" },
     ]);
     expect(plan.slots.every((s) => s.recipeId)).toBe(true);
-    expect(latestParams(db).people).toBe(3);
+    expect(latestParams(db).adults).toBe(3);
   });
 
   it("comida de plato único en ajustes: 14 platos", () => {
@@ -126,8 +126,8 @@ describe("servicio de menú", () => {
 
   it("los ajustes se guardan sin regenerar y valen para semanas nuevas", () => {
     // Sin menú: queda como preferencia
-    expect(saveParams("2026-11-09", { ...DEFAULT_PARAMS, people: 4 }, db)).toEqual({ hasPlan: false });
-    expect(latestParams(db).people).toBe(4);
+    expect(saveParams("2026-11-09", { ...DEFAULT_PARAMS, adults: 4 }, db)).toEqual({ hasPlan: false });
+    expect(latestParams(db).adults).toBe(4);
     expect(getPlan("2026-11-09", db)).toBeNull();
 
     // Con menú: se guardan en el menú pero los platos no cambian

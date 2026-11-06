@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { AlertTriangle, CalendarDays, Check, Lock, Plus, RefreshCw, SlidersHorizontal, Soup, Trash2, Utensils, X } from "lucide-react";
+import { AlertTriangle, CalendarDays, Check, Lock, Salad, Plus, RefreshCw, SlidersHorizontal, Soup, Trash2, Utensils, X } from "lucide-react";
 import {
   deleteMenu,
   generateMenu,
@@ -21,6 +21,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Sheet } from "@/components/ui/sheet";
 import { WeekNav } from "@/components/ui/week-nav";
 import { CATEGORIES, CATEGORY_LABELS, type PlanParams } from "@/lib/domain/menu";
+import { NutritionCard } from "./nutrition-card";
 import { slotLabel } from "./slot-label";
 import { formatMinutes } from "@/lib/domain/recipe";
 import type { MenuView, SlotView } from "@/lib/menu/view";
@@ -162,6 +163,8 @@ export function WeekMenu({ view }: { view: MenuView }) {
             ))}
           </ul>
 
+          <NutritionCard rules={plan.nutrition} />
+
           {plan.warnings.length > 0 && (
             <div className="mb-4 rounded-2xl bg-terra-soft p-4 text-[14px] leading-snug">
               {plan.warnings.map((w) => (
@@ -271,6 +274,11 @@ function SlotRow({ slot, busy, onOpen }: { slot: SlotView; busy: boolean; onOpen
               {CATEGORY_LABELS[r.category]}
               {r.minutes !== null && ` · ${formatMinutes(r.minutes)}`}
             </span>
+            {slot.suggestVeg && (
+              <span className="mt-0.5 flex items-center gap-1 text-[12px] font-medium text-accent">
+                <Salad className="size-3.5" /> Acompaña con ensalada o verdura
+              </span>
+            )}
           </span>
         </>
       ) : slot.freeText ? (

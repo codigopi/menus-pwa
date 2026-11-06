@@ -44,6 +44,8 @@ export interface IdeasRequest {
   profileText: string;
   existingTitles: string[];
   people: number;
+  /** Niños en casa: platos que les gusten y sin pescados con mucho mercurio. */
+  children?: number;
   vegetarian?: boolean;
   avoid?: string[];
   maxMinutes?: number | null;
@@ -64,6 +66,9 @@ export function buildIdeasPrompt(req: IdeasRequest): string {
   }
   lines.push(`Gustos de la casa: ${req.profileText}`);
   lines.push(`Raciones: ${req.people}.`);
+  if (req.children) {
+    lines.push(`Hay ${req.children} niños en casa: platos que gusten a niños, sin picante, y sin pez espada, emperador, atún rojo, tiburón ni lucio.`);
+  }
   if (req.maxMinutes) lines.push(`Tiempo total máximo: ${req.maxMinutes} minutos.`);
   if (req.vegetarian) lines.push("Dieta vegetariana: sin carne ni pescado (tampoco caldos de carne o pescado).");
   if (req.avoid?.length) lines.push(`Evita estos ingredientes: ${req.avoid.join(", ")}.`);

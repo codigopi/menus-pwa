@@ -34,7 +34,7 @@ beforeEach(() => {
   make("Tortilla", 4, [[6, null, "huevos"], [600, "g", "patatas"], [1, null, "cebolla"], [null, null, "sal"]]);
   make("Lentejas", 4, [[300, "g", "lentejas"], [1, null, "cebolla"], [1, null, "chorizo"]]);
   // Un menú de solo 2 platos para que las cantidades sean predecibles
-  generateWeek(WEEK, { ...DEFAULT_PARAMS, meals: ["comida"], people: 2, maxMinutesWeekday: null }, 1, db);
+  generateWeek(WEEK, { ...DEFAULT_PARAMS, meals: ["comida"], adults: 2, children: 0, maxMinutesWeekday: null }, 1, db);
   const plan = getPlan(WEEK, db)!;
   plan.slots.forEach((s, i) => i > 1 && updateSlot(s.id, { recipeId: null, freeText: "Comer fuera", locked: true }, db));
 });
