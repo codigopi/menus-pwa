@@ -175,6 +175,7 @@ export const CATALOG: CatalogEntry[] = [
   E("lenteja", "despensa", { pricePerKg: 2.6 }),
   E("garbanzo", "despensa", { pricePerKg: 2.6 }),
   E("alubia", "despensa", { pricePerKg: 3 }),
+  E("pipo", "despensa", { pricePerKg: 3 }),
   E("garbanzo cocido", "despensa", { pricePerKg: 2.5 }),
   E("lenteja cocida", "despensa", { pricePerKg: 2.5 }),
   E("alubia cocida", "despensa", { pricePerKg: 2.5 }),

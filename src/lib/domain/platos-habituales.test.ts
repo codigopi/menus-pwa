@@ -6,6 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { classifyRecipe, courseRole, fitsMeal } from "./menu";
+import { nutritionFlags } from "./nutrition";
 import { recipeInputSchema } from "./recipe";
 
 interface Plato {
@@ -17,7 +18,10 @@ interface Plato {
   steps: string[];
 }
 
-const { recetas } = JSON.parse(fs.readFileSync(path.join(process.cwd(), "scripts/platos-habituales.json"), "utf8")) as { recetas: Plato[] };
+const load = (f: string) => (JSON.parse(fs.readFileSync(path.join(process.cwd(), "scripts", f), "utf8")) as { recetas: Plato[] }).recetas;
+const habituales = load("platos-habituales.json");
+const sugeridos = load("platos-sugeridos.json");
+const recetas = [...habituales, ...sugeridos];
 const toRecipe = (p: Plato) => ({ tags: p.tags, ingredients: p.ingredients.map(([, , name]) => ({ name })) });
 
 describe("platos habituales", () => {
@@ -54,5 +58,30 @@ describe("platos habituales", () => {
     expect(cat("Pasta con carne picada")).toBe("pasta_arroz");
     expect(cat("Pechugas de pollo empanadas")).toBe("carne");
     expect(cat("Tortilla de patata")).toBe("huevo");
+  });
+});
+
+describe("platos sugeridos para la pirámide", () => {
+  const flags = (p: Plato) => nutritionFlags({ title: p.title, tags: p.tags, ingredients: p.ingredients.map(([, , name, note]) => ({ name, note })) });
+
+  it("no repiten títulos de los habituales y llevan la etiqueta 'sugerida'", () => {
+    const titles = new Set(habituales.map((p) => p.title.toLowerCase()));
+    for (const p of sugeridos) {
+      expect(titles.has(p.title.toLowerCase()), p.title).toBe(false);
+      expect(p.tags, p.title).toContain("sugerida");
+    }
+    expect(new Set(recetas.map((p) => p.title.toLowerCase())).size).toBe(recetas.length);
+  });
+
+  it("cubren lo que faltaba: pescado azul, segundos de huevo, más legumbres y cenas con verdura", () => {
+    expect(sugeridos.filter((p) => flags(p).oilyFish).length).toBeGreaterThanOrEqual(4);
+    expect(sugeridos.filter((p) => classifyRecipe(toRecipe(p)) === "huevo" && courseRole(toRecipe(p)) === "segundo").length).toBeGreaterThanOrEqual(3);
+    expect(recetas.filter((p) => classifyRecipe(toRecipe(p)) === "legumbre").length).toBeGreaterThanOrEqual(7);
+    const dinnersWithVeg = recetas.filter((p) => fitsMeal(toRecipe(p), "cena") && flags(p).vegetables && !flags(p).fastFood);
+    expect(dinnersWithVeg.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it("los pipos son legumbre", () => {
+    expect(classifyRecipe(toRecipe(habituales.find((p) => p.title === "Pipos")!))).toBe("legumbre");
   });
 });

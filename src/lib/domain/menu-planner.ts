@@ -153,9 +153,9 @@ function score(r: PlannerRecipe, index: number, ctx: Context): number {
   // Comida de plato único: mejor un plato completo (cocido, lentejas con chorizo…)
   if (slot.meal === "comida" && (slot.course ?? "unico") === "unico" && ctx.wholeMeals.has(r.id)) s += 2;
 
-  // Tiempo: entre semana mejor rápido
+  // Tiempo: solo si la familia ha puesto un límite entre semana, mejor lo rápido
   const total = totalMinutes(r);
-  if (!slot.weekend && total !== null && total > 45) s -= 1;
+  if (!slot.weekend && ctx.params.maxMinutesWeekday !== null && total !== null && total > 45) s -= 1;
 
   // No repetir lo reciente
   const ago = ctx.recent.get(r.id);

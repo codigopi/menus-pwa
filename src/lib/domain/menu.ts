@@ -47,7 +47,7 @@ export const DEFAULT_PARAMS: PlanParams = {
   children: 0,
   meals: ["comida", "cena"],
   lunchCourses: "dos",
-  maxMinutesWeekday: 45,
+  maxMinutesWeekday: null, // sin límite: el tiempo no condiciona el menú salvo que se configure
   maxMinutesWeekend: null,
   budget: "normal",
   vegetarian: false,
@@ -84,7 +84,7 @@ export function normalizeParams(raw: unknown): PlanParams {
 // ---------------------------------------------------------------- clasificación
 
 const KEYWORDS: Record<Exclude<Category, "verdura">, string[]> = {
-  legumbre: ["lenteja", "garbanzo", "alubia", "judion", "haba", "soja", "guisante", "hummus", "fabe"],
+  legumbre: ["lenteja", "garbanzo", "alubia", "judion", "haba", "soja", "guisante", "hummus", "fabe", "pipo", "pocha", "frijol"],
   pescado: [
     "pescado", "merluza", "bacalao", "salmon", "atun", "bonito", "sardina", "boqueron", "caballa", "gamba", "langostino",
     "mejillon", "almeja", "calamar", "sepia", "pulpo", "rape", "dorada", "lubina", "gallo", "trucha", "lenguado", "marisco", "chipiron", "anchoa", "pota",

@@ -120,7 +120,7 @@ describe("planWeek", () => {
   it("no pone el cocido (3 h) entre semana con límite de 45 min", () => {
     for (const seed of [1, 2, 3, 4, 5]) {
       const slots = week();
-      const { assignments } = planWeek({ recipes: LIBRARY, slots, params: params(), seed });
+      const { assignments } = planWeek({ recipes: LIBRARY, slots, params: params({ maxMinutesWeekday: 45 }), seed });
       assignments.forEach((id, i) => {
         if (id === "cocido") expect(slots[i].weekend).toBe(true);
       });

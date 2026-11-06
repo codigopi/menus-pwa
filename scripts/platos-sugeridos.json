@@ -1,0 +1,1801 @@
+{
+  "_nota": "Platos sugeridos para completar la pirámide nutricional (pescado azul, segundos de huevo, carne blanca, legumbres y cenas con verdura). Llevan la etiqueta 'sugerida' para encontrarlos y borrar los que no gusten. Raciones: 4.",
+  "recetas": [
+    {
+      "title": "Garbanzos con espinacas",
+      "tags": [
+        "primero",
+        "comida",
+        "legumbres",
+        "cuchara",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 25,
+      "ingredients": [
+        [
+          2,
+          "bote",
+          "garbanzos cocidos"
+        ],
+        [
+          300,
+          "g",
+          "espinacas"
+        ],
+        [
+          2,
+          "diente",
+          "ajo"
+        ],
+        [
+          1,
+          "rebanada",
+          "pan",
+          "para el majado"
+        ],
+        [
+          1,
+          "cdta",
+          "pimentón"
+        ],
+        [
+          1,
+          "cdta",
+          "comino"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Freír el ajo y el pan, y majarlos con el pimentón y el comino.",
+        "Rehogar las espinacas en el aceite.",
+        "Añadir los garbanzos escurridos, el majado y un vaso de agua. Cocer 10 minutos."
+      ]
+    },
+    {
+      "title": "Potaje de garbanzos con verduras",
+      "tags": [
+        "primero",
+        "comida",
+        "legumbres",
+        "cuchara",
+        "sugerida"
+      ],
+      "prep": 15,
+      "cook": 40,
+      "ingredients": [
+        [
+          2,
+          "bote",
+          "garbanzos cocidos"
+        ],
+        [
+          2,
+          null,
+          "patatas"
+        ],
+        [
+          2,
+          null,
+          "zanahorias"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          200,
+          "g",
+          "acelgas"
+        ],
+        [
+          1,
+          "cdta",
+          "pimentón"
+        ],
+        [
+          1,
+          "hoja",
+          "laurel"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Sofreír la cebolla picada y añadir el pimentón.",
+        "Incorporar las patatas, las zanahorias y el laurel, cubrir de agua y cocer 20 minutos.",
+        "Añadir los garbanzos y las acelgas y cocer 10 minutos más."
+      ]
+    },
+    {
+      "title": "Lentejas con verduras",
+      "tags": [
+        "primero",
+        "comida",
+        "legumbres",
+        "cuchara",
+        "sugerida"
+      ],
+      "prep": 15,
+      "cook": 45,
+      "ingredients": [
+        [
+          400,
+          "g",
+          "lentejas pardinas"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          2,
+          null,
+          "zanahorias"
+        ],
+        [
+          1,
+          null,
+          "pimiento rojo"
+        ],
+        [
+          1,
+          null,
+          "calabacín"
+        ],
+        [
+          2,
+          "diente",
+          "ajo"
+        ],
+        [
+          1,
+          "cdta",
+          "pimentón"
+        ],
+        [
+          1,
+          "hoja",
+          "laurel"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Sofreír la cebolla, el ajo, el pimiento y la zanahoria picados.",
+        "Añadir el pimentón, las lentejas, el calabacín en dados y el laurel.",
+        "Cubrir de agua y cocer a fuego suave unos 40 minutos."
+      ]
+    },
+    {
+      "title": "Ensalada de garbanzos",
+      "tags": [
+        "primero",
+        "comida",
+        "legumbres",
+        "rápida",
+        "sugerida"
+      ],
+      "prep": 15,
+      "cook": 0,
+      "ingredients": [
+        [
+          2,
+          "bote",
+          "garbanzos cocidos"
+        ],
+        [
+          2,
+          null,
+          "tomates"
+        ],
+        [
+          1,
+          null,
+          "pimiento verde"
+        ],
+        [
+          1,
+          null,
+          "pepino"
+        ],
+        [
+          1,
+          null,
+          "cebolleta"
+        ],
+        [
+          2,
+          "lata",
+          "atún"
+        ],
+        [
+          4,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          2,
+          "cda",
+          "vinagre"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Enjuagar y escurrir los garbanzos.",
+        "Picar el tomate, el pimiento, el pepino y la cebolleta.",
+        "Mezclar todo con el atún y aliñar con aceite, vinagre y sal."
+      ]
+    },
+    {
+      "title": "Crema de calabacín",
+      "tags": [
+        "primero",
+        "verdura",
+        "cena ligera",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 25,
+      "ingredients": [
+        [
+          3,
+          null,
+          "calabacines"
+        ],
+        [
+          1,
+          null,
+          "puerro"
+        ],
+        [
+          1,
+          null,
+          "patata"
+        ],
+        [
+          4,
+          null,
+          "quesitos"
+        ],
+        [
+          2,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Pochar el puerro en el aceite.",
+        "Añadir el calabacín y la patata troceados, cubrir de agua y cocer 20 minutos.",
+        "Triturar con los quesitos y salar."
+      ]
+    },
+    {
+      "title": "Crema de calabaza y zanahoria",
+      "tags": [
+        "primero",
+        "verdura",
+        "cena ligera",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 25,
+      "ingredients": [
+        [
+          600,
+          "g",
+          "calabaza"
+        ],
+        [
+          3,
+          null,
+          "zanahorias"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          1,
+          null,
+          "patata"
+        ],
+        [
+          2,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Pochar la cebolla en el aceite.",
+        "Añadir la calabaza, la zanahoria y la patata troceadas, cubrir de agua y cocer 20 minutos.",
+        "Triturar y salar."
+      ]
+    },
+    {
+      "title": "Menestra de verduras",
+      "tags": [
+        "primero",
+        "comida",
+        "verdura",
+        "sugerida"
+      ],
+      "prep": 15,
+      "cook": 25,
+      "ingredients": [
+        [
+          300,
+          "g",
+          "judías verdes"
+        ],
+        [
+          200,
+          "g",
+          "guisantes"
+        ],
+        [
+          2,
+          null,
+          "zanahorias"
+        ],
+        [
+          4,
+          null,
+          "alcachofas"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          2,
+          "diente",
+          "ajo"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Cocer las verduras por separado hasta que estén tiernas.",
+        "Sofreír la cebolla y el ajo.",
+        "Saltear todas las verduras juntas con el sofrito."
+      ]
+    },
+    {
+      "title": "Gazpacho",
+      "tags": [
+        "primero",
+        "comida",
+        "verdura",
+        "rápida",
+        "sugerida"
+      ],
+      "prep": 15,
+      "cook": 0,
+      "ingredients": [
+        [
+          1,
+          "kg",
+          "tomates",
+          "maduros"
+        ],
+        [
+          1,
+          null,
+          "pepino"
+        ],
+        [
+          1,
+          null,
+          "pimiento verde"
+        ],
+        [
+          1,
+          "diente",
+          "ajo"
+        ],
+        [
+          60,
+          "ml",
+          "aceite de oliva"
+        ],
+        [
+          2,
+          "cda",
+          "vinagre"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Trocear las verduras.",
+        "Triturar con el aceite, el vinagre, la sal y un poco de agua fría.",
+        "Colar si se quiere y enfriar."
+      ]
+    },
+    {
+      "title": "Coliflor gratinada",
+      "tags": [
+        "primero",
+        "comida",
+        "verdura",
+        "horno",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 30,
+      "ingredients": [
+        [
+          1,
+          null,
+          "coliflor"
+        ],
+        [
+          500,
+          "ml",
+          "leche"
+        ],
+        [
+          40,
+          "g",
+          "harina"
+        ],
+        [
+          40,
+          "g",
+          "mantequilla"
+        ],
+        [
+          80,
+          "g",
+          "queso rallado"
+        ],
+        [
+          null,
+          null,
+          "nuez moscada"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Cocer la coliflor en ramilletes 10 minutos.",
+        "Hacer una bechamel con la mantequilla, la harina y la leche.",
+        "Cubrir la coliflor con la bechamel y el queso y gratinar 10 minutos."
+      ]
+    },
+    {
+      "title": "Arroz con verduras",
+      "tags": [
+        "primero",
+        "comida",
+        "arroz",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 25,
+      "ingredients": [
+        [
+          300,
+          "g",
+          "arroz"
+        ],
+        [
+          1,
+          null,
+          "pimiento rojo"
+        ],
+        [
+          1,
+          null,
+          "calabacín"
+        ],
+        [
+          1,
+          null,
+          "zanahoria"
+        ],
+        [
+          100,
+          "g",
+          "guisantes"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          900,
+          "ml",
+          "caldo de verduras"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Sofreír las verduras picadas.",
+        "Añadir el arroz y nacararlo un minuto.",
+        "Echar el caldo caliente y cocer 18 minutos."
+      ]
+    },
+    {
+      "title": "Macarrones con atún y tomate",
+      "tags": [
+        "primero",
+        "comida",
+        "pasta",
+        "sugerida"
+      ],
+      "prep": 5,
+      "cook": 15,
+      "ingredients": [
+        [
+          400,
+          "g",
+          "macarrones"
+        ],
+        [
+          3,
+          "lata",
+          "atún"
+        ],
+        [
+          400,
+          "g",
+          "tomate triturado"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          60,
+          "g",
+          "queso rallado"
+        ],
+        [
+          2,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "orégano"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Cocer la pasta.",
+        "Pochar la cebolla, añadir el tomate y cocer 10 minutos con orégano.",
+        "Mezclar con el atún y la pasta y servir con queso."
+      ]
+    },
+    {
+      "title": "Salmón al horno con patatas",
+      "tags": [
+        "segundo",
+        "comida",
+        "pescado",
+        "horno",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 30,
+      "ingredients": [
+        [
+          4,
+          "filete",
+          "salmón"
+        ],
+        [
+          3,
+          null,
+          "patatas"
+        ],
+        [
+          1,
+          null,
+          "limón"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "eneldo"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Hornear las patatas en rodajas con aceite y sal 15 minutos a 200 °C.",
+        "Poner encima el salmón con limón y eneldo.",
+        "Hornear 12–15 minutos más."
+      ]
+    },
+    {
+      "title": "Sardinas a la plancha",
+      "tags": [
+        "segundo",
+        "comida",
+        "pescado",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 10,
+      "ingredients": [
+        [
+          800,
+          "g",
+          "sardinas",
+          "limpias"
+        ],
+        [
+          1,
+          null,
+          "limón"
+        ],
+        [
+          2,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "perejil"
+        ],
+        [
+          null,
+          null,
+          "sal gruesa"
+        ]
+      ],
+      "steps": [
+        "Calentar la plancha y untar las sardinas con aceite.",
+        "Hacerlas 2–3 minutos por lado con sal gruesa.",
+        "Servir con limón y perejil."
+      ]
+    },
+    {
+      "title": "Boquerones al horno",
+      "tags": [
+        "segundo",
+        "comida",
+        "pescado",
+        "horno",
+        "sugerida"
+      ],
+      "prep": 15,
+      "cook": 15,
+      "ingredients": [
+        [
+          800,
+          "g",
+          "boquerones",
+          "limpios y abiertos"
+        ],
+        [
+          3,
+          "diente",
+          "ajo"
+        ],
+        [
+          null,
+          null,
+          "perejil"
+        ],
+        [
+          1,
+          null,
+          "limón"
+        ],
+        [
+          4,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Colocar los boquerones abiertos en una bandeja.",
+        "Cubrir con ajo y perejil picados, aceite y limón.",
+        "Hornear a 200 °C unos 10–12 minutos."
+      ]
+    },
+    {
+      "title": "Caballa al horno con verduras",
+      "tags": [
+        "segundo",
+        "comida",
+        "pescado",
+        "horno",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 25,
+      "ingredients": [
+        [
+          4,
+          null,
+          "caballas",
+          "limpias"
+        ],
+        [
+          1,
+          null,
+          "pimiento rojo"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          2,
+          null,
+          "tomates"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Asar las verduras en tiras 10 minutos a 200 °C.",
+        "Poner encima las caballas con aceite y sal.",
+        "Hornear 12–15 minutos más."
+      ]
+    },
+    {
+      "title": "Bonito con tomate",
+      "tags": [
+        "segundo",
+        "comida",
+        "pescado",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 25,
+      "ingredients": [
+        [
+          600,
+          "g",
+          "bonito",
+          "en tacos"
+        ],
+        [
+          500,
+          "g",
+          "tomate triturado"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          1,
+          null,
+          "pimiento verde"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Pochar la cebolla y el pimiento.",
+        "Añadir el tomate y cocer 15 minutos.",
+        "Incorporar el bonito y cocer solo 3–4 minutos para que no se seque."
+      ]
+    },
+    {
+      "title": "Tortilla de calabacín",
+      "tags": [
+        "segundo",
+        "huevos",
+        "verdura",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 15,
+      "ingredients": [
+        [
+          6,
+          null,
+          "huevos"
+        ],
+        [
+          2,
+          null,
+          "calabacines"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Pochar la cebolla y el calabacín en dados.",
+        "Mezclar con los huevos batidos y sal.",
+        "Cuajar la tortilla por los dos lados."
+      ]
+    },
+    {
+      "title": "Huevos rellenos de atún",
+      "tags": [
+        "segundo",
+        "comida",
+        "huevos",
+        "sugerida"
+      ],
+      "prep": 15,
+      "cook": 10,
+      "ingredients": [
+        [
+          8,
+          null,
+          "huevos"
+        ],
+        [
+          2,
+          "lata",
+          "atún"
+        ],
+        [
+          100,
+          "g",
+          "tomate frito"
+        ],
+        [
+          3,
+          "cda",
+          "mayonesa"
+        ],
+        [
+          1,
+          null,
+          "lechuga"
+        ]
+      ],
+      "steps": [
+        "Cocer los huevos 10 minutos, enfriar y pelar.",
+        "Partirlos por la mitad y mezclar las yemas con el atún y el tomate.",
+        "Rellenar, cubrir con mayonesa y servir sobre lechuga."
+      ]
+    },
+    {
+      "title": "Revuelto de champiñones y espárragos",
+      "tags": [
+        "segundo",
+        "huevos",
+        "verdura",
+        "rápida",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 10,
+      "ingredients": [
+        [
+          6,
+          null,
+          "huevos"
+        ],
+        [
+          300,
+          "g",
+          "champiñones"
+        ],
+        [
+          1,
+          "manojo",
+          "espárragos trigueros"
+        ],
+        [
+          1,
+          "diente",
+          "ajo"
+        ],
+        [
+          2,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Saltear el ajo, los espárragos troceados y los champiñones.",
+        "Añadir los huevos batidos con sal y remover a fuego suave hasta que cuajen."
+      ]
+    },
+    {
+      "title": "Pollo al horno con patatas",
+      "tags": [
+        "segundo",
+        "comida",
+        "carne",
+        "horno",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 50,
+      "ingredients": [
+        [
+          1.2,
+          "kg",
+          "pollo troceado"
+        ],
+        [
+          4,
+          null,
+          "patatas"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          1,
+          null,
+          "limón"
+        ],
+        [
+          4,
+          "diente",
+          "ajo"
+        ],
+        [
+          100,
+          "ml",
+          "vino blanco"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "tomillo"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Poner en una bandeja las patatas y la cebolla en rodajas y encima el pollo salpimentado.",
+        "Añadir el ajo, el limón, el tomillo, el vino y el aceite.",
+        "Hornear a 200 °C unos 45–50 minutos, dándole la vuelta a mitad."
+      ]
+    },
+    {
+      "title": "Pollo a la plancha con ensalada",
+      "tags": [
+        "segundo",
+        "carne",
+        "rápida",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 10,
+      "ingredients": [
+        [
+          600,
+          "g",
+          "pechuga de pollo",
+          "en filetes"
+        ],
+        [
+          1,
+          null,
+          "lechuga"
+        ],
+        [
+          2,
+          null,
+          "tomates"
+        ],
+        [
+          1,
+          null,
+          "zanahoria",
+          "rallada"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          1,
+          "cda",
+          "vinagre"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Salar los filetes y hacerlos a la plancha 3–4 minutos por lado.",
+        "Preparar la ensalada y aliñarla.",
+        "Servir juntos."
+      ]
+    },
+    {
+      "title": "Conejo al ajillo",
+      "tags": [
+        "segundo",
+        "comida",
+        "carne",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 35,
+      "ingredients": [
+        [
+          1,
+          "kg",
+          "conejo troceado"
+        ],
+        [
+          8,
+          "diente",
+          "ajo"
+        ],
+        [
+          150,
+          "ml",
+          "vino blanco"
+        ],
+        [
+          1,
+          "hoja",
+          "laurel"
+        ],
+        [
+          4,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "perejil"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Dorar el conejo salpimentado en el aceite.",
+        "Añadir los ajos enteros y el laurel.",
+        "Regar con el vino y cocer tapado 25 minutos. Espolvorear perejil."
+      ]
+    },
+    {
+      "title": "Filetes de pavo a la plancha con pimientos",
+      "tags": [
+        "segundo",
+        "carne",
+        "rápida",
+        "sugerida"
+      ],
+      "prep": 5,
+      "cook": 15,
+      "ingredients": [
+        [
+          600,
+          "g",
+          "pechuga de pavo",
+          "en filetes"
+        ],
+        [
+          2,
+          null,
+          "pimientos verdes"
+        ],
+        [
+          1,
+          null,
+          "pimiento rojo"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Hacer los pimientos en tiras a fuego medio.",
+        "Salar los filetes y hacerlos a la plancha 2–3 minutos por lado.",
+        "Servir con los pimientos."
+      ]
+    },
+    {
+      "title": "Albóndigas de pollo en salsa de tomate",
+      "tags": [
+        "segundo",
+        "comida",
+        "carne",
+        "sugerida"
+      ],
+      "prep": 20,
+      "cook": 30,
+      "ingredients": [
+        [
+          600,
+          "g",
+          "carne picada de pollo"
+        ],
+        [
+          1,
+          null,
+          "huevo"
+        ],
+        [
+          50,
+          "g",
+          "pan rallado"
+        ],
+        [
+          2,
+          "diente",
+          "ajo"
+        ],
+        [
+          500,
+          "g",
+          "tomate triturado"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          1,
+          null,
+          "zanahoria"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Mezclar la carne con el huevo, el pan rallado, el ajo picado y sal; formar bolitas.",
+        "Dorarlas ligeramente en una sartén con poco aceite.",
+        "Hacer una salsa con la cebolla, la zanahoria y el tomate y cocer las albóndigas en ella 15 minutos."
+      ]
+    },
+    {
+      "title": "Merluza al horno con verduras",
+      "tags": [
+        "cena",
+        "pescado",
+        "horno",
+        "cena ligera",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 25,
+      "ingredients": [
+        [
+          600,
+          "g",
+          "merluza",
+          "en lomos"
+        ],
+        [
+          1,
+          null,
+          "calabacín"
+        ],
+        [
+          1,
+          null,
+          "pimiento rojo"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Asar las verduras en tiras con aceite y sal 15 minutos a 200 °C.",
+        "Poner encima la merluza y hornear 8–10 minutos más."
+      ]
+    },
+    {
+      "title": "Ensalada completa",
+      "tags": [
+        "cena",
+        "verdura",
+        "rápida",
+        "cena ligera",
+        "sugerida"
+      ],
+      "prep": 15,
+      "cook": 10,
+      "ingredients": [
+        [
+          1,
+          null,
+          "lechuga"
+        ],
+        [
+          3,
+          null,
+          "tomates"
+        ],
+        [
+          4,
+          null,
+          "huevos",
+          "cocidos"
+        ],
+        [
+          2,
+          "lata",
+          "atún"
+        ],
+        [
+          1,
+          null,
+          "zanahoria",
+          "rallada"
+        ],
+        [
+          100,
+          "g",
+          "maíz"
+        ],
+        [
+          4,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          1,
+          "cda",
+          "vinagre"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Cocer los huevos 10 minutos.",
+        "Preparar la lechuga, el tomate y la zanahoria.",
+        "Añadir el atún, el maíz y los huevos en cuartos y aliñar."
+      ]
+    },
+    {
+      "title": "Revuelto de calabacín y gambas",
+      "tags": [
+        "cena",
+        "huevos",
+        "verdura",
+        "rápida",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 10,
+      "ingredients": [
+        [
+          6,
+          null,
+          "huevos"
+        ],
+        [
+          2,
+          null,
+          "calabacines"
+        ],
+        [
+          200,
+          "g",
+          "gambas",
+          "peladas"
+        ],
+        [
+          1,
+          "diente",
+          "ajo"
+        ],
+        [
+          2,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Saltear el ajo y el calabacín en dados.",
+        "Añadir las gambas un minuto.",
+        "Echar los huevos batidos con sal y remover hasta que cuajen."
+      ]
+    },
+    {
+      "title": "Pisto con huevo",
+      "tags": [
+        "cena",
+        "verdura",
+        "huevos",
+        "sugerida"
+      ],
+      "prep": 15,
+      "cook": 35,
+      "ingredients": [
+        [
+          2,
+          null,
+          "calabacines"
+        ],
+        [
+          1,
+          null,
+          "pimiento rojo"
+        ],
+        [
+          1,
+          null,
+          "pimiento verde"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          400,
+          "g",
+          "tomate triturado"
+        ],
+        [
+          4,
+          null,
+          "huevos"
+        ],
+        [
+          4,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Pochar la cebolla y los pimientos picados.",
+        "Añadir el calabacín y luego el tomate; cocer 20 minutos.",
+        "Servir con un huevo frito o a la plancha encima."
+      ]
+    },
+    {
+      "title": "Brochetas de pollo con verduras",
+      "tags": [
+        "cena",
+        "carne",
+        "sugerida"
+      ],
+      "prep": 15,
+      "cook": 15,
+      "ingredients": [
+        [
+          600,
+          "g",
+          "pechuga de pollo",
+          "en dados"
+        ],
+        [
+          1,
+          null,
+          "pimiento rojo"
+        ],
+        [
+          1,
+          null,
+          "calabacín"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          200,
+          "g",
+          "tomates cherry"
+        ],
+        [
+          3,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "orégano"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Montar las brochetas alternando pollo y verduras.",
+        "Aliñar con aceite, orégano y sal.",
+        "Hacerlas a la plancha o al horno 12–15 minutos."
+      ]
+    },
+    {
+      "title": "Calabacines rellenos de carne",
+      "tags": [
+        "cena",
+        "horno",
+        "sugerida"
+      ],
+      "prep": 20,
+      "cook": 30,
+      "ingredients": [
+        [
+          4,
+          null,
+          "calabacines"
+        ],
+        [
+          400,
+          "g",
+          "carne picada"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          200,
+          "g",
+          "tomate frito"
+        ],
+        [
+          80,
+          "g",
+          "queso rallado"
+        ],
+        [
+          2,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Partir los calabacines a lo largo, vaciarlos y hornearlos 10 minutos.",
+        "Sofreír la cebolla con la pulpa y la carne, añadir el tomate.",
+        "Rellenar, cubrir con queso y gratinar 15 minutos."
+      ]
+    },
+    {
+      "title": "Wraps de pollo y verduras",
+      "tags": [
+        "cena",
+        "sugerida"
+      ],
+      "prep": 15,
+      "cook": 10,
+      "ingredients": [
+        [
+          8,
+          null,
+          "tortillas de trigo"
+        ],
+        [
+          500,
+          "g",
+          "pechuga de pollo",
+          "en tiras"
+        ],
+        [
+          1,
+          null,
+          "pimiento rojo"
+        ],
+        [
+          1,
+          null,
+          "cebolla"
+        ],
+        [
+          1,
+          null,
+          "lechuga"
+        ],
+        [
+          2,
+          null,
+          "tomates"
+        ],
+        [
+          150,
+          "g",
+          "salsa de yogur"
+        ],
+        [
+          2,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Saltear el pollo con el pimiento y la cebolla en tiras.",
+        "Calentar las tortillas.",
+        "Rellenar con el salteado, lechuga, tomate y salsa de yogur."
+      ]
+    },
+    {
+      "title": "Crema de verduras",
+      "tags": [
+        "cena",
+        "verdura",
+        "cena ligera",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 25,
+      "ingredients": [
+        [
+          2,
+          null,
+          "puerros"
+        ],
+        [
+          3,
+          null,
+          "zanahorias"
+        ],
+        [
+          1,
+          null,
+          "calabacín"
+        ],
+        [
+          1,
+          null,
+          "patata"
+        ],
+        [
+          200,
+          "g",
+          "judías verdes"
+        ],
+        [
+          2,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Pochar los puerros en el aceite.",
+        "Añadir el resto de verduras troceadas, cubrir de agua y cocer 20 minutos.",
+        "Triturar y salar."
+      ]
+    },
+    {
+      "title": "Sopa de verduras con fideos",
+      "tags": [
+        "cena",
+        "verdura",
+        "cena ligera",
+        "sugerida"
+      ],
+      "prep": 10,
+      "cook": 25,
+      "ingredients": [
+        [
+          1500,
+          "ml",
+          "caldo de verduras"
+        ],
+        [
+          2,
+          null,
+          "zanahorias"
+        ],
+        [
+          1,
+          null,
+          "puerro"
+        ],
+        [
+          100,
+          "g",
+          "judías verdes"
+        ],
+        [
+          100,
+          "g",
+          "fideos finos"
+        ],
+        [
+          1,
+          "cda",
+          "aceite de oliva"
+        ],
+        [
+          null,
+          null,
+          "sal"
+        ]
+      ],
+      "steps": [
+        "Cocer las verduras picadas en el caldo 15 minutos.",
+        "Añadir los fideos y cocer el tiempo del paquete."
+      ]
+    }
+  ]
+}
