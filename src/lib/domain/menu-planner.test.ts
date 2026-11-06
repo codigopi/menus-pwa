@@ -1,0 +1,202 @@
+import { describe, expect, it } from "vitest";
+import { addDays, dayLabel, daysBetween, isIsoDate, isWeekend, mondayOf, todayIso, weekDays, weekRangeLabel } from "./dates";
+import { classifyRecipe, DEFAULT_PARAMS, hasMeatOrFish, type Meal, type PlanParams } from "./menu";
+import { allowedRecipes, planWeek, replanSlot, type PlannerRecipe, type PlannerSlot } from "./menu-planner";
+
+// ---------------------------------------------------------------- fechas
+
+describe("fechas", () => {
+  it("lunes de la semana y días", () => {
+    expect(mondayOf("2026-11-06")).toBe("2026-11-02"); // viernes → lunes
+    expect(mondayOf("2026-11-08")).toBe("2026-11-02"); // domingo → lunes anterior
+    expect(mondayOf("2026-11-02")).toBe("2026-11-02");
+    expect(weekDays("2026-10-26")).toEqual(["2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30", "2026-10-31", "2026-11-01"]);
+    expect(addDays("2026-12-31", 1)).toBe("2027-01-01");
+    expect(daysBetween("2026-11-01", "2026-11-08")).toBe(7);
+    expect(isWeekend("2026-11-07")).toBe(true);
+    expect(isWeekend("2026-11-06")).toBe(false);
+  });
+
+  it("etiquetas en español", () => {
+    expect(dayLabel("2026-11-02")).toBe("Lunes 2");
+    expect(weekRangeLabel("2026-11-02")).toBe("2 – 8 nov");
+    expect(weekRangeLabel("2026-10-26")).toBe("26 oct – 1 nov");
+  });
+
+  it("valida y calcula hoy en Madrid", () => {
+    expect(isIsoDate("2026-02-30")).toBe(false);
+    expect(isIsoDate("2026-02-28")).toBe(true);
+    expect(isIsoDate("hoy")).toBe(false);
+    // 23:30 UTC del domingo ya es lunes en Madrid (UTC+1 en invierno)
+    expect(todayIso("Europe/Madrid", new Date("2026-11-08T23:30:00Z"))).toBe("2026-11-09");
+  });
+});
+
+// ---------------------------------------------------------------- clasificación
+
+const rec = (id: string, ingredients: string[], extra: Partial<PlannerRecipe> = {}): PlannerRecipe => ({
+  id,
+  title: id,
+  tags: [],
+  rating: null,
+  isFavorite: false,
+  prepMinutes: 10,
+  cookMinutes: 20,
+  ingredients: ingredients.map((name) => ({ name })),
+  ...extra,
+});
+
+describe("classifyRecipe", () => {
+  it.each([
+    [["lentejas", "chorizo", "cebolla"], "legumbre"],
+    [["macarrones", "chorizo", "tomate"], "pasta_arroz"],
+    [["pechuga de pollo", "ajo"], "carne"],
+    [["huevos", "patatas", "cebolla"], "huevo"],
+    [["merluza", "patata"], "pescado"],
+    [["calabacín", "pimiento", "tomate"], "verdura"],
+    [["cebolla", "bacalao desalado", "pimiento"], "pescado"],
+  ])("%j → %s", (ings, cat) => expect(classifyRecipe({ tags: [], ingredients: ings.map((name) => ({ name })) })).toBe(cat));
+
+  it("la etiqueta manda", () => {
+    expect(classifyRecipe({ tags: ["legumbres"], ingredients: [{ name: "cebolla" }] })).toBe("legumbre");
+  });
+
+  it("vegetariano detecta carne y pescado (también en caldos)", () => {
+    expect(hasMeatOrFish({ tags: [], ingredients: [{ name: "arroz" }, { name: "caldo de pollo" }] })).toBe(true);
+    expect(hasMeatOrFish({ tags: [], ingredients: [{ name: "garbanzos" }, { name: "espinacas" }] })).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------- planificador
+
+const LIBRARY: PlannerRecipe[] = [
+  rec("lentejas", ["lentejas", "chorizo"], { tags: ["cuchara"] }),
+  rec("garbanzos", ["garbanzos", "espinacas"]),
+  rec("alubias", ["alubias", "verduras"]),
+  rec("merluza", ["merluza", "patata"]),
+  rec("salmon", ["salmón", "limón"]),
+  rec("bacalao", ["bacalao", "tomate"]),
+  rec("pollo", ["pechuga de pollo", "ajo"]),
+  rec("albondigas", ["carne picada", "tomate"]),
+  rec("tortilla", ["huevos", "patatas"]),
+  rec("revuelto", ["huevos", "champiñones"]),
+  rec("macarrones", ["macarrones", "tomate"]),
+  rec("arroz", ["arroz", "verduras"]),
+  rec("pisto", ["calabacín", "pimiento", "tomate"]),
+  rec("crema", ["calabacín", "puerro"]),
+  rec("ensalada", ["lechuga", "tomate"]),
+  rec("cocido", ["garbanzos", "morcillo"], { prepMinutes: 30, cookMinutes: 150 }),
+];
+
+function week(meals: Meal[] = ["comida", "cena"]): PlannerSlot[] {
+  return weekDays("2026-11-02").flatMap((date) => meals.map((meal) => ({ date, meal, weekend: isWeekend(date) })));
+}
+
+const params = (p: Partial<PlanParams> = {}): PlanParams => ({ ...DEFAULT_PARAMS, ...p });
+
+describe("planWeek", () => {
+  it("rellena los 14 huecos sin repetir y equilibrando tipos", () => {
+    const { assignments, warnings } = planWeek({ recipes: LIBRARY, slots: week(), params: params(), seed: 42 });
+    expect(assignments.every(Boolean)).toBe(true);
+    expect(new Set(assignments).size).toBe(14);
+    expect(warnings).toEqual([]);
+
+    const cats = assignments.map((id) => classifyRecipe(LIBRARY.find((r) => r.id === id)!));
+    const count = (c: string) => cats.filter((x) => x === c).length;
+    expect(count("legumbre")).toBeGreaterThanOrEqual(2);
+    expect(count("pescado")).toBeGreaterThanOrEqual(2);
+    expect(count("carne")).toBeLessThanOrEqual(4);
+  });
+
+  it("es reproducible con la misma semilla y cambia con otra", () => {
+    const a = planWeek({ recipes: LIBRARY, slots: week(), params: params(), seed: 7 }).assignments;
+    const b = planWeek({ recipes: LIBRARY, slots: week(), params: params(), seed: 7 }).assignments;
+    const c = planWeek({ recipes: LIBRARY, slots: week(), params: params(), seed: 99 }).assignments;
+    expect(a).toEqual(b);
+    expect(a).not.toEqual(c);
+  });
+
+  it("no pone el cocido (3 h) entre semana con límite de 45 min", () => {
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const slots = week();
+      const { assignments } = planWeek({ recipes: LIBRARY, slots, params: params(), seed });
+      assignments.forEach((id, i) => {
+        if (id === "cocido") expect(slots[i].weekend).toBe(true);
+      });
+    }
+  });
+
+  it("evita legumbres en la cena", () => {
+    let legumeDinners = 0;
+    for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+      const slots = week();
+      const { assignments } = planWeek({ recipes: LIBRARY, slots, params: params(), seed });
+      assignments.forEach((id, i) => {
+        if (slots[i].meal === "cena" && classifyRecipe(LIBRARY.find((r) => r.id === id)!) === "legumbre") legumeDinners++;
+      });
+    }
+    expect(legumeDinners).toBeLessThanOrEqual(2); // en 8 semanas, casi nunca
+  });
+
+  it("respeta los huecos fijos y no repite la receta fijada", () => {
+    const slots = week();
+    slots[0].fixed = "tortilla";
+    slots[3].fixed = null; // "comer fuera": hueco fijo vacío
+    const { assignments } = planWeek({ recipes: LIBRARY, slots, params: params(), seed: 3 });
+    expect(assignments[0]).toBe("tortilla");
+    expect(assignments[3]).toBeNull();
+    expect(assignments.filter((id) => id === "tortilla")).toHaveLength(1);
+  });
+
+  it("vegetariano y alimentos a evitar", () => {
+    const { assignments } = planWeek({ recipes: LIBRARY, slots: week(["comida"]), params: params({ vegetarian: true, avoid: ["tomate"] }), seed: 1 });
+    const chosen = assignments.filter(Boolean).map((id) => LIBRARY.find((r) => r.id === id)!);
+    expect(chosen.some(hasMeatOrFish)).toBe(false);
+    expect(chosen.some((r) => r.ingredients.some((i) => i.name === "tomate"))).toBe(false);
+  });
+
+  it("penaliza lo cocinado la semana pasada", () => {
+    const recent = new Map([["tortilla", 3], ["merluza", 3]]);
+    const counts = { tortilla: 0 };
+    for (const seed of [1, 2, 3, 4, 5, 6]) {
+      const { assignments } = planWeek({ recipes: LIBRARY, slots: week(["cena"]), params: params(), seed, recent });
+      if (assignments.includes("tortilla")) counts.tortilla++;
+    }
+    expect(counts.tortilla).toBeLessThanOrEqual(2);
+  });
+
+  it("biblioteca pequeña: repite y avisa; vacía: avisa", () => {
+    const small = planWeek({ recipes: LIBRARY.slice(0, 3), slots: week(), params: params({ maxMinutesWeekday: null }), seed: 1 });
+    expect(small.assignments.every(Boolean)).toBe(true);
+    expect(small.warnings.some((w) => w.includes("Se repiten"))).toBe(true);
+
+    const empty = planWeek({ recipes: [], slots: week(), params: params(), seed: 1 });
+    expect(empty.assignments.every((a) => a === null)).toBe(true);
+    expect(empty.warnings[0]).toContain("Aún no tienes recetas");
+  });
+
+  it("allowedRecipes descarta recetas sin ingredientes", () => {
+    expect(allowedRecipes([rec("vacia", [])], params())).toEqual([]);
+  });
+});
+
+describe("regenerar", () => {
+  it("con el menú anterior, cambia la mayoría de los platos", () => {
+    const slots = week();
+    const first = planWeek({ recipes: LIBRARY, slots, params: params(), seed: 1 }).assignments;
+    const second = planWeek({ recipes: LIBRARY, slots, params: params(), seed: 2, previous: first }).assignments;
+    const same = second.filter((id, i) => id === first[i]).length;
+    expect(same).toBeLessThanOrEqual(3);
+  });
+});
+
+describe("replanSlot", () => {
+  it("elige una receta distinta para ese hueco", () => {
+    const slots = week();
+    const { assignments } = planWeek({ recipes: LIBRARY, slots, params: params(), seed: 5 });
+    const next = replanSlot({ recipes: LIBRARY, slots, params: params(), seed: 6 }, assignments, 2);
+    expect(next).not.toBeNull();
+    expect(next).not.toBe(assignments[2]);
+    expect(assignments.filter((id, i) => i !== 2)).not.toContain(next);
+  });
+});
