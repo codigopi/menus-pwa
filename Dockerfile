@@ -4,6 +4,11 @@
 # --- 1. Dependencias -------------------------------------------------------
 FROM node:24-bookworm-slim AS deps
 WORKDIR /app
+# better-sqlite3 es nativo: si no hay binario precompilado para esta versión
+# de Node, se compila. Herramientas solo en esta etapa (no llegan a la imagen final).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
 RUN npm ci
 

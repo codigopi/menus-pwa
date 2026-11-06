@@ -1,0 +1,10 @@
+# Finales de línea LF en el repositorio y en la copia de trabajo
+# (evita avisos CRLF en Windows y problemas en la imagen Docker de Linux).
+* text=auto eol=lf
+
+# Binarios
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary

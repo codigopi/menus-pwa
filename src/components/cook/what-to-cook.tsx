@@ -31,7 +31,7 @@ const label = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * "¿Qué cocino?": eliges lo que tienes y se buscan recetas de tu biblioteca,
  * indicando qué usas y qué te falta. Todo se calcula en el móvil, al instante.
  */
-export function WhatToCook({ recipes, aiEnabled }: { recipes: Recipe[]; aiEnabled: boolean }) {
+export function WhatToCook({ recipes, aiEnabled, pantry = [] }: { recipes: Recipe[]; aiEnabled: boolean; pantry?: string[] }) {
   const [have, setHave] = usePersistentList("cec:tengo", EMPTY);
   const [staples, setStaples] = usePersistentList("cec:basicos", DEFAULT_STAPLES);
   const [draft, setDraft] = useState("");
@@ -108,6 +108,20 @@ export function WhatToCook({ recipes, aiEnabled }: { recipes: Recipe[]; aiEnable
             </button>
           </div>
         )}
+
+        {/* Lo que hay en la despensa (pestaña Compra), sin reescribirlo */}
+        {(() => {
+          const fromPantry = pantry.filter((p) => !have.some((h) => ingredientMatches(h, p)) && !staples.some((st) => ingredientMatches(st, p)));
+          return fromPantry.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setHave([...have, ...fromPantry.map((p) => p.toLowerCase())])}
+              className="tap mb-3 flex h-9 items-center gap-1.5 rounded-full bg-accent-soft px-3.5 text-[14px] font-medium text-accent"
+            >
+              <Plus className="size-4" /> Añadir lo de mi despensa ({fromPantry.length})
+            </button>
+          ) : null;
+        })()}
 
         <form
           onSubmit={(e) => {

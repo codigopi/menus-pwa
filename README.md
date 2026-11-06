@@ -1,67 +1,97 @@
 # Cocina en Casa
 
-PWA para gestionar las comidas y cenas de casa: recetas, importación desde redes, menú semanal, lista de la compra e histórico.
+PWA para gestionar las comidas y cenas de casa: recetario, importación desde redes, «¿qué cocino con lo que tengo?», menú semanal, lista de la compra con despensa, histórico y sugerencias según vuestros gustos. Interfaz en español, pensada para iPhone.
+
+## Funciones
+
+| Sección | Qué hace | ¿Necesita IA? |
+| --- | --- | --- |
+| **Recetas** | Crear, editar, foto, ingredientes con secciones, pasos, etiquetas, favoritas, valoración. Búsqueda instantánea. «Lo he cocinado» con notas. | No |
+| **Importar** | Webs con datos estructurados (la mayoría de recetarios) | No |
+| | Instagram, TikTok, YouTube, texto pegado y capturas de pantalla | Sí |
+| **¿Qué cocino?** | Recetas de tu biblioteca con lo que tienes, qué te falta, básicos editables, añadir lo de la despensa | No |
+| | Recetas nuevas inventadas con esos ingredientes | Sí |
+| **Menú** | Semana automática equilibrada (variedad, cenas ligeras, tiempo, vegetariano, alimentos a evitar, presupuesto con coste estimado, gustos). Bloquear, regenerar, elegir a mano, sobras, comer fuera, marcar cocinado. | No |
+| **Compra** | Lista desde el menú: escalada, fusionada, por secciones del súper, restando la despensa. Casillas, añadir a mano, compartir, coste orientativo. **Funciona sin conexión.** | No |
+| **Histórico** | Qué se cocinó y cuándo, valoraciones, notas, estadísticas | No |
+| **Tus gustos** | Perfil aprendido de valoraciones e histórico; recetas para redescubrir | No |
+| | Ideas de platos nuevos (cocina casera tradicional, originales) | Sí |
+
+Sin `ANTHROPIC_API_KEY` todo funciona salvo lo marcado con IA, que aparece como «pendiente de configurar».
 
 ## Stack
 
-- **Next.js 16** (App Router, Cache Components) + **TypeScript** + **Tailwind v4**
-- **SQLite** (better-sqlite3) + **Drizzle ORM**, con migraciones automáticas al arrancar
-- Fotos en disco (`UPLOADS_DIR`), servidas por `/api/fotos/[nombre]`
-- **PWA**: manifest + service worker propio (`public/sw.js`) + página offline
-- **Vitest** para la lógica de dominio (`src/lib/domain`)
+- **Next.js 16** (App Router, Cache Components) + **TypeScript** + **Tailwind v4**, UI estilo iOS
+- **SQLite** (better-sqlite3) + **Drizzle ORM**, migraciones automáticas al arrancar
+- **Claude API** (`@anthropic-ai/sdk`) con salidas estructuradas (Zod) para importar y proponer recetas
+- **PWA**: manifest, service worker propio (`public/sw.js`), página offline, Web Share Target (Android)
+- **Vitest** (lógica de dominio e integración con SQLite en memoria)
 
 ## Desarrollo
 
 ```bash
 npm install
-cp .env.example .env.local   # opcional: ajusta rutas o ACCESS_CODE
+cp .env.example .env.local   # opcional
 npm run dev                  # http://localhost:3000
 ```
-
-La base de datos se crea sola en `./data/app.db` al abrir la primera página.
 
 | Script | Qué hace |
 | --- | --- |
 | `npm run dev` | Servidor de desarrollo |
-| `npm test` | Tests unitarios y de integración (SQLite en memoria) |
+| `npm test` | Tests (dominio + integración) |
 | `npm run typecheck` | Comprobación de tipos |
 | `npm run lint` | ESLint |
 | `npm run build` | Build de producción (standalone) |
 | `npm run db:generate` | Crea una migración tras cambiar `src/lib/db/schema.ts` |
-| `npm run icons` | Regenera los iconos PNG desde `scripts/icon.svg` |
+| `npm run icons` | Regenera los iconos desde `scripts/icon.svg` |
 
-> El service worker solo se registra en producción. Para probar la PWA en local: `npm run build && npm start`.
+> El service worker solo se registra en producción: `npm run build && npm start` para probar la PWA y el modo sin conexión.
+
+## Variables de entorno
+
+| Variable | Por defecto | Para qué |
+| --- | --- | --- |
+| `DATABASE_PATH` | `./data/app.db` (`/data/app.db` en Docker) | Fichero SQLite |
+| `UPLOADS_DIR` | `./data/uploads` (`/data/uploads` en Docker) | Fotos de recetas |
+| `ACCESS_CODE` | — | Código de acceso de la casa (muy recomendable si la URL es pública) |
+| `ANTHROPIC_API_KEY` | — | Activa las funciones de IA |
+| `ANTHROPIC_MODEL` | `claude-opus-5-5` | Modelo de IA (`claude-sonnet-5-5` o `claude-haiku-5-5` para abaratar) |
+| `APP_TIMEZONE` | `Europe/Madrid` | Zona horaria para «hoy» y las semanas del menú |
 
 ## Estructura
 
 ```
 src/
-  app/(app)/          pantallas con barra de pestañas (recetas, menú, compra…)
-  app/acceso/         pantalla del código de acceso
-  app/api/fotos/      servidor de fotos
-  components/ui/      componentes estilo iOS (cabecera, listas, hojas, estrellas…)
-  components/recipes/ biblioteca, formulario y controles de receta
-  lib/domain/         lógica pura + tests (unidades, cantidades, esquema de receta)
-  lib/db/             conexión SQLite y esquema Drizzle
-  lib/recipes/        repositorio de datos (+ test de integración)
-  proxy.ts            puerta de acceso opcional (ACCESS_CODE)
-drizzle/              migraciones SQL versionadas
+  app/(app)/            pantallas con barra de pestañas
+    recetas/ importar/ que-cocino/ menu/ compra/ historico/ gustos/ mas/
+  app/acceso/           código de acceso
+  app/api/fotos/        servidor de fotos
+  components/           UI estilo iOS y componentes por sección
+  lib/domain/           LÓGICA PURA + tests: unidades, cantidades, ingredientes,
+                        catálogo/secciones/precios, lista de la compra, menú,
+                        emparejado «qué cocino», gustos, estadísticas, fechas
+  lib/ai/               extracción e ideas con Claude (salida estructurada)
+  lib/importers/        JSON-LD, redes sociales, descarga segura (anti-SSRF)
+  lib/{recipes,menu,shopping,history,taste}/   datos y casos de uso por sección
+  lib/offline/          cola de cambios de la compra sin conexión
+  lib/maintenance/      limpieza de fotos huérfanas (cada 24 h)
+  proxy.ts              puerta del código de acceso
+  instrumentation.ts    tareas de mantenimiento al arrancar
+drizzle/                migraciones SQL versionadas
 ```
 
 ## Despliegue en Dokploy
 
-1. Crea una **Application** apuntando a este repositorio, con *Build Type* **Dockerfile**.
-2. En **Advanced → Volumes / Mounts** añade un volumen con *Mount Path* `/data`. Ahí viven la base de datos y las fotos, y es lo único que hay que respaldar.
-3. En **Environment** define al menos:
-   ```
-   ACCESS_CODE=un-codigo-que-solo-sepa-casa
-   ```
-   `DATABASE_PATH` y `UPLOADS_DIR` ya apuntan a `/data` dentro de la imagen.
-4. En **Domains** asigna un dominio con HTTPS (Let's Encrypt). Es obligatorio para instalar la PWA. Puerto del contenedor: `3000`.
-5. Despliega. Las migraciones se aplican solas al arrancar.
+1. **Application** apuntando a este repositorio, *Build Type* **Dockerfile**.
+2. **Volumes / Mounts**: volumen con *Mount Path* `/data` (base de datos y fotos: lo único que hay que respaldar).
+3. **Environment**: al menos `ACCESS_CODE=…`; y `ANTHROPIC_API_KEY=…` para la IA.
+4. **Domains**: dominio con HTTPS (obligatorio para instalar la PWA). Puerto `3000`.
+5. Desplegar. Las migraciones se aplican solas.
 
-**Copia de seguridad:** con la app parada, o usando `sqlite3 /data/app.db ".backup /data/backup.db"`, copia `/data`.
+**Copia de seguridad**: copia `/data` (con la app parada) o `sqlite3 /data/app.db ".backup /data/backup.db"`.
 
-## Instalar en el iPhone
+## En el iPhone
 
-Abre la URL en **Safari** → botón **Compartir** → **Añadir a pantalla de inicio**.
+- **Instalar**: Safari → Compartir → «Añadir a pantalla de inicio».
+- **Compartir desde Instagram/TikTok**: iOS no permite que las apps web aparezcan en «Compartir»; en *Importar* hay una guía para crear un Atajo que lo hace (se configura una vez).
+- **Sin conexión**: la lista de la compra funciona sin red (marcar, añadir, quitar) y se sincroniza al volver.

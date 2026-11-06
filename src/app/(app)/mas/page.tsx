@@ -41,7 +41,7 @@ export default function Page() {
         <ListRow icon={iconBox("bg-[#5b8bd6]", <Smartphone className="size-4" />)} title="Cocina en Casa como app" />
       </ListGroup>
       <ListGroup>
-        <ListRow icon={iconBox("bg-muted", <Info className="size-4" />)} title="Versión" detail="0.7 · Fase 7" />
+        <ListRow icon={iconBox("bg-muted", <Info className="size-4" />)} title="Versión" detail="1.0" />
       </ListGroup>
     </>
   );
