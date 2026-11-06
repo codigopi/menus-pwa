@@ -8,6 +8,7 @@ import { getDb, type AppDb } from "@/lib/db";
 import { mealPlans, mealSlots } from "@/lib/db/schema";
 import { addDays, daysBetween, type IsoDate } from "@/lib/domain/dates";
 import { DEFAULT_PARAMS, type Meal, type PlanParams } from "@/lib/domain/menu";
+import { getSetting, setSetting } from "@/lib/settings";
 
 export interface SlotRow {
   id: string;
@@ -47,10 +48,24 @@ export function getPlan(weekStart: IsoDate, db: AppDb = getDb()): PlanRow | null
   return { id: plan.id, weekStart: plan.weekStart, params: { ...DEFAULT_PARAMS, ...plan.params }, slots };
 }
 
-/** Parámetros del menú más reciente (para proponerlos en una semana nueva). */
+const PARAMS_KEY = "menu.params";
+
+/**
+ * Ajustes del menú preferidos por la casa (para semanas nuevas).
+ * Orden: preferencia guardada → último menú generado → valores por defecto.
+ */
 export function latestParams(db: AppDb = getDb()): PlanParams {
+  const saved = getSetting<Partial<PlanParams>>(PARAMS_KEY, db);
+  if (saved) return { ...DEFAULT_PARAMS, ...saved };
   const last = db.select({ params: mealPlans.params }).from(mealPlans).orderBy(desc(mealPlans.weekStart)).limit(1).get();
   return last ? { ...DEFAULT_PARAMS, ...last.params } : DEFAULT_PARAMS;
+}
+
+/** Guarda los ajustes como preferencia y, si hay menú esa semana, en el menú (sin regenerarlo). */
+export function saveParams(weekStart: IsoDate, params: PlanParams, db: AppDb = getDb()): { hasPlan: boolean } {
+  setSetting(PARAMS_KEY, params, db);
+  const res = db.update(mealPlans).set({ params }).where(eq(mealPlans.weekStart, weekStart)).run();
+  return { hasPlan: res.changes > 0 };
 }
 
 /** Recetas de menús de los `days` días anteriores → días que han pasado. */

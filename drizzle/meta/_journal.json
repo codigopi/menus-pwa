@@ -15,6 +15,13 @@
       "when": 1793923201581,
       "tag": "0001_menu",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793924535074,
+      "tag": "0002_settings",
+      "breakpoints": true
     }
   ]
 }

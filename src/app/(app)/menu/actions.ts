@@ -27,6 +27,16 @@ export async function generateMenu(weekStart: string, params: PlanParams): Promi
   return {};
 }
 
+/** Guarda los ajustes sin regenerar. Devuelve si había menú esa semana. */
+export async function saveMenuParams(weekStart: string, params: PlanParams): Promise<{ hasPlan: boolean; error?: string }> {
+  const week = validWeek(weekStart);
+  const parsed = planParamsSchema.safeParse(params);
+  if (!week || !parsed.success) return { hasPlan: false, error: "Ajustes no válidos" };
+  const res = repo.saveParams(week, parsed.data);
+  done();
+  return res;
+}
+
 export async function regenerateMenuSlot(slotId: string): Promise<void> {
   regenerateSlot(slotId, seed());
   done();

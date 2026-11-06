@@ -100,3 +100,12 @@ export const mealSlots = sqliteTable(
     index("meal_slots_date_idx").on(t.date),
   ],
 );
+
+// ---------------------------------------------------------------- Preferencias de la casa
+
+/** Preferencias clave → valor JSON (p. ej. "menu.params"). */
+export const appSettings = sqliteTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value", { mode: "json" }).$type<unknown>().notNull(),
+  ...timestamps,
+});

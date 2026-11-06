@@ -28,6 +28,7 @@ function buildSlots(weekStart: IsoDate, params: PlanParams, previous: repo.SlotR
 
 /** Genera la semana (o regenera lo no bloqueado si ya existe). */
 export function generateWeek(weekStart: IsoDate, params: PlanParams, seed: number, db: AppDb = getDb()): void {
+  repo.saveParams(weekStart, params, db); // generar también fija la preferencia
   const previous = repo.getPlan(weekStart, db)?.slots ?? [];
   const { slots, meta } = buildSlots(weekStart, params, previous);
   const { assignments } = planWeek({

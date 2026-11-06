@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { AlertTriangle, CalendarDays, ChevronLeft, ChevronRight, Lock, Plus, RefreshCw, SlidersHorizontal, Soup, Trash2, Utensils } from "lucide-react";
+import { AlertTriangle, CalendarDays, ChevronLeft, ChevronRight, Lock, Plus, RefreshCw, SlidersHorizontal, Soup, Trash2, Utensils, X } from "lucide-react";
 import {
   deleteMenu,
   generateMenu,
   regenerateMenuSlot,
+  saveMenuParams,
   setSlotFreeText,
   setSlotRecipe,
   toggleSlotLock,
@@ -31,6 +32,8 @@ export function WeekMenu({ view }: { view: MenuView }) {
   const [paramsOpen, setParamsOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Ajustes guardados que aún no se han aplicado al menú de esta semana. */
+  const [unapplied, setUnapplied] = useState(false);
 
   const plan = view.plan;
 
@@ -39,7 +42,18 @@ export function WeekMenu({ view }: { view: MenuView }) {
     startTransition(async () => {
       const res = await generateMenu(view.weekStart, params);
       if (res.error) setError(res.error);
-      else setParamsOpen(false);
+      else {
+        setParamsOpen(false);
+        setUnapplied(false);
+      }
+    });
+  }
+
+  function saveParams(params: PlanParams) {
+    startTransition(async () => {
+      const res = await saveMenuParams(view.weekStart, params);
+      if (res.error) setError(res.error);
+      else if (res.hasPlan) setUnapplied(true);
     });
   }
 
@@ -121,6 +135,18 @@ export function WeekMenu({ view }: { view: MenuView }) {
         <>
           <p className="mb-2 px-1 text-[13px] text-muted">{paramsSummary(plan.params)}</p>
 
+          {unapplied && (
+            <div className="mb-4 flex items-center gap-3 rounded-2xl bg-accent-soft p-3 pl-4" role="status">
+              <p className="min-w-0 flex-1 text-[14px] leading-snug">Ajustes guardados. ¿Aplicarlos al menú de esta semana?</p>
+              <Button size="md" disabled={pending} onClick={() => generate(plan.params)} className="shrink-0">
+                Regenerar
+              </Button>
+              <button type="button" aria-label="Ahora no" onClick={() => setUnapplied(false)} className="tap shrink-0 text-muted">
+                <X className="size-5" />
+              </button>
+            </div>
+          )}
+
           {/* Equilibrio de la semana */}
           <ul className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4" aria-label="Equilibrio de la semana">
             {CATEGORIES.filter((c) => plan.stats[c]).map((c) => (
@@ -183,6 +209,7 @@ export function WeekMenu({ view }: { view: MenuView }) {
           hasPlan={!!plan}
           pending={pending}
           onSubmit={generate}
+          onSave={saveParams}
         />
       )}
 

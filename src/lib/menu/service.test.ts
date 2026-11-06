@@ -7,7 +7,7 @@ import { openDb, type AppDb } from "@/lib/db";
 import { DEFAULT_PARAMS } from "@/lib/domain/menu";
 import { recipeInputSchema } from "@/lib/domain/recipe";
 import { createRecipe, deleteRecipe } from "@/lib/recipes/repo";
-import { getPlan, latestParams, recentRecipes, updateSlot } from "./repo";
+import { getPlan, latestParams, recentRecipes, saveParams, updateSlot } from "./repo";
 import { generateWeek, regenerateSlot } from "./service";
 
 let db: AppDb;
@@ -84,6 +84,22 @@ describe("servicio de menú", () => {
     expect(recent.size).toBe(14);
     expect(Math.min(...recent.values())).toBe(1); // domingo anterior
     expect(Math.max(...recent.values())).toBe(7); // lunes anterior
+  });
+
+  it("los ajustes se guardan sin regenerar y valen para semanas nuevas", () => {
+    // Sin menú: queda como preferencia
+    expect(saveParams("2026-11-09", { ...DEFAULT_PARAMS, people: 4 }, db)).toEqual({ hasPlan: false });
+    expect(latestParams(db).people).toBe(4);
+    expect(getPlan("2026-11-09", db)).toBeNull();
+
+    // Con menú: se guardan en el menú pero los platos no cambian
+    generateWeek("2026-11-02", DEFAULT_PARAMS, 1, db);
+    const before = getPlan("2026-11-02", db)!;
+    expect(saveParams("2026-11-02", { ...DEFAULT_PARAMS, vegetarian: true }, db)).toEqual({ hasPlan: true });
+    const after = getPlan("2026-11-02", db)!;
+    expect(after.params.vegetarian).toBe(true);
+    expect(after.slots.map((s) => s.recipeId)).toEqual(before.slots.map((s) => s.recipeId));
+    expect(latestParams(db).vegetarian).toBe(true);
   });
 
   it("borrar una receta deja su hueco vacío, sin romper el menú", () => {

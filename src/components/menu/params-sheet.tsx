@@ -32,16 +32,28 @@ export function ParamsSheet({
   hasPlan,
   pending,
   onSubmit,
+  onSave,
 }: {
   open: boolean;
   onClose: () => void;
   initial: PlanParams;
   hasPlan: boolean;
   pending: boolean;
+  /** Generar/regenerar con estos ajustes (también los guarda). */
   onSubmit: (params: PlanParams) => void;
+  /** Guardar sin regenerar (al cerrar la hoja con cambios). */
+  onSave: (params: PlanParams) => void;
 }) {
   const [p, setP] = useState(initial);
   const [avoidDraft, setAvoidDraft] = useState("");
+
+  /** Cerrar = guardar (como en los Ajustes de iOS). Incluye lo escrito en "evitar". */
+  function close() {
+    const pendingAvoid = avoidDraft.trim().toLowerCase();
+    const final = pendingAvoid && !p.avoid.includes(pendingAvoid) ? { ...p, avoid: [...p.avoid, pendingAvoid] } : p;
+    if (JSON.stringify(final) !== JSON.stringify(initial)) onSave(final);
+    onClose();
+  }
   const set = <K extends keyof PlanParams>(k: K, v: PlanParams[K]) => setP((prev) => ({ ...prev, [k]: v }));
 
   function toggleMeal(meal: Meal) {
@@ -58,12 +70,12 @@ export function ParamsSheet({
   const row = "flex min-h-12 items-center justify-between gap-3 px-4 py-2";
 
   return (
-    <Sheet open={open} onClose={onClose}>
+    <Sheet open={open} onClose={close}>
       <div className="max-h-[85dvh] overflow-y-auto rounded-2xl bg-canvas pb-4">
         <div className="sticky top-0 z-10 flex items-center justify-between bg-canvas/95 px-4 pt-4 pb-2 backdrop-blur">
           <h2 className="text-[20px] font-bold">Ajustes del menú</h2>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className="tap grid size-8 place-items-center rounded-full bg-fill">
-            <X className="size-4" />
+          <button type="button" onClick={close} className="tap px-1 text-[17px] font-semibold text-accent">
+            Listo
           </button>
         </div>
 
@@ -147,9 +159,13 @@ export function ParamsSheet({
 
         <div className="mx-3 mt-4">
           <Button size="lg" disabled={pending} onClick={() => onSubmit(p)}>
-            {pending ? "Generando…" : hasPlan ? "Guardar y regenerar" : "Generar menú"}
+            {pending ? "Generando…" : hasPlan ? "Regenerar con estos ajustes" : "Generar menú"}
           </Button>
-          {hasPlan && <p className="mt-2 text-center text-[13px] text-muted">Los platos bloqueados se mantienen.</p>}
+          <p className="mt-2 text-center text-[13px] leading-snug text-muted">
+            {hasPlan
+              ? "Los ajustes se guardan al cerrar. Al regenerar, los platos bloqueados se mantienen."
+              : "Los ajustes se guardan al cerrar y se usarán en las próximas semanas."}
+          </p>
         </div>
       </div>
     </Sheet>
