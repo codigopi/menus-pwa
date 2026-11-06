@@ -33,6 +33,8 @@ const isSnapshot = (v: unknown): v is Snapshot | null =>
 const opsKey = (week: string) => `cec:compra:ops:${week}`;
 const snapKey = (week: string) => `cec:compra:snap:${week}`;
 const opId = (o: ShoppingOp) => `${o.type}:${o.id}:${o.at}`;
+/** Id para lo añadido a mano. crypto.randomUUID solo existe en HTTPS: en HTTP (dominio de pruebas), alternativa. */
+const newId = () => globalThis.crypto?.randomUUID?.() ?? `m-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
 /** Aplica la cola local sobre la lista (mismo resultado que hará el servidor). */
 export function applyLocalOps(items: ShoppingItemView[], ops: ShoppingOp[]): ShoppingItemView[] {
@@ -124,7 +126,7 @@ export function useShoppingSync(view: ShoppingView) {
     online,
     pendingCount: ops.filter((o) => !o.syncedAt).length,
     toggle: (id: string, checked: boolean) => push({ type: "check", id, checked, at: Date.now() }),
-    add: (text: string) => push({ type: "add", id: crypto.randomUUID(), text, at: Date.now() }),
+    add: (text: string) => push({ type: "add", id: newId(), text, at: Date.now() }),
     remove: (id: string) => push({ type: "delete", id, at: Date.now() }),
   };
 }

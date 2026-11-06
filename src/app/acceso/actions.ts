@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ACCESS_COOKIE, ACCESS_MAX_AGE, accessCode, accessToken, safeEqual, safeNextPath } from "@/lib/access";
 
@@ -20,9 +20,13 @@ export async function enter(_prev: AccessState, formData: FormData): Promise<Acc
     return { error: "Código incorrecto" };
   }
 
+  // "secure" solo si se entra por HTTPS (Traefik/Dokploy lo indica en
+  // x-forwarded-proto): con un dominio de pruebas en HTTP el navegador
+  // descartaría la cookie y no habría forma de entrar.
+  const proto = (await headers()).get("x-forwarded-proto")?.split(",")[0].trim();
   (await cookies()).set(ACCESS_COOKIE, expected, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: proto === "https",
     sameSite: "lax",
     path: "/",
     maxAge: ACCESS_MAX_AGE,

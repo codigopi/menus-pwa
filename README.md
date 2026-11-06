@@ -86,6 +86,8 @@ drizzle/                migraciones SQL versionadas
 2. **Volumes / Mounts**: volumen con *Mount Path* `/data` (base de datos y fotos: lo único que hay que respaldar).
 3. **Environment**: al menos `ACCESS_CODE=…`; y `ANTHROPIC_API_KEY=…` para la IA.
 4. **Domains**: dominio con HTTPS (obligatorio para instalar la PWA). Puerto `3000`.
+   Con el dominio gratuito de Dokploy (`*.traefik.me`, solo HTTP) la app funciona, pero sin modo
+   sin conexión: el navegador no activa el service worker fuera de HTTPS.
 5. Desplegar. Las migraciones se aplican solas.
 
 **Copia de seguridad**: copia `/data` (con la app parada) o `sqlite3 /data/app.db ".backup /data/backup.db"`.
