@@ -3,17 +3,18 @@
  * (better-sqlite3) con la BD inyectable para tests.
  */
 import { randomUUID } from "node:crypto";
-import { and, asc, desc, eq, gte, isNotNull, lt } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNotNull, lt } from "drizzle-orm";
 import { getDb, type AppDb } from "@/lib/db";
 import { mealPlans, mealSlots } from "@/lib/db/schema";
 import { addDays, daysBetween, type IsoDate } from "@/lib/domain/dates";
-import { DEFAULT_PARAMS, type Meal, type PlanParams } from "@/lib/domain/menu";
+import { DEFAULT_PARAMS, type Course, type Meal, type PlanParams } from "@/lib/domain/menu";
 import { getSetting, setSetting } from "@/lib/settings";
 
 export interface SlotRow {
   id: string;
   date: IsoDate;
   meal: Meal;
+  course: Course;
   recipeId: string | null;
   freeText: string | null;
   locked: boolean;
@@ -23,10 +24,16 @@ export interface PlanRow {
   id: string;
   weekStart: IsoDate;
   params: PlanParams;
+  /** Días de plato único en esta semana (con comida de dos platos por defecto). */
+  singleCourseDays: IsoDate[];
   slots: SlotRow[];
 }
 
 const MEAL_ORDER: Record<Meal, number> = { comida: 0, cena: 1 };
+const COURSE_ORDER: Record<Course, number> = { primero: 0, segundo: 1, unico: 2 };
+
+/** Clave de un hueco dentro de la semana. */
+export const slotKey = (s: { date: string; meal: Meal; course: Course }) => `${s.date}|${s.meal}|${s.course}`;
 
 export function getPlan(weekStart: IsoDate, db: AppDb = getDb()): PlanRow | null {
   const plan = db.select().from(mealPlans).where(eq(mealPlans.weekStart, weekStart)).get();
@@ -36,6 +43,7 @@ export function getPlan(weekStart: IsoDate, db: AppDb = getDb()): PlanRow | null
       id: mealSlots.id,
       date: mealSlots.date,
       meal: mealSlots.meal,
+      course: mealSlots.course,
       recipeId: mealSlots.recipeId,
       freeText: mealSlots.freeText,
       locked: mealSlots.locked,
@@ -44,8 +52,14 @@ export function getPlan(weekStart: IsoDate, db: AppDb = getDb()): PlanRow | null
     .where(eq(mealSlots.planId, plan.id))
     .orderBy(asc(mealSlots.date))
     .all()
-    .sort((a, b) => a.date.localeCompare(b.date) || MEAL_ORDER[a.meal] - MEAL_ORDER[b.meal]);
-  return { id: plan.id, weekStart: plan.weekStart, params: { ...DEFAULT_PARAMS, ...plan.params }, slots };
+    .sort((a, b) => a.date.localeCompare(b.date) || MEAL_ORDER[a.meal] - MEAL_ORDER[b.meal] || COURSE_ORDER[a.course] - COURSE_ORDER[b.course]);
+  return {
+    id: plan.id,
+    weekStart: plan.weekStart,
+    params: { ...DEFAULT_PARAMS, ...plan.params },
+    singleCourseDays: plan.singleCourseDays,
+    slots,
+  };
 }
 
 const PARAMS_KEY = "menu.params";
@@ -86,18 +100,45 @@ export function recentRecipes(weekStart: IsoDate, days = 14, db: AppDb = getDb()
 
 export type NewSlot = Omit<SlotRow, "id">;
 
-/** Crea o reemplaza el menú de una semana (con todos sus huecos). */
-export function savePlan(weekStart: IsoDate, params: PlanParams, slots: NewSlot[], db: AppDb = getDb()): string {
+/**
+ * Crea o actualiza el menú de una semana con todos sus huecos.
+ * Los huecos que ya existían (mismo día, comida y plato) se actualizan en su
+ * sitio, sin cambiar su id: así no se pierde la marca de «cocinado».
+ */
+export function savePlan(
+  weekStart: IsoDate,
+  params: PlanParams,
+  slots: NewSlot[],
+  db: AppDb = getDb(),
+  singleCourseDays?: IsoDate[],
+): string {
   return db.transaction((tx) => {
     const existing = tx.select({ id: mealPlans.id }).from(mealPlans).where(eq(mealPlans.weekStart, weekStart)).get();
     const planId = existing?.id ?? randomUUID();
     if (existing) {
-      tx.update(mealPlans).set({ params }).where(eq(mealPlans.id, planId)).run();
-      tx.delete(mealSlots).where(eq(mealSlots.planId, planId)).run();
+      tx.update(mealPlans).set({ params, ...(singleCourseDays ? { singleCourseDays } : {}) }).where(eq(mealPlans.id, planId)).run();
     } else {
-      tx.insert(mealPlans).values({ id: planId, weekStart, params }).run();
+      tx.insert(mealPlans).values({ id: planId, weekStart, params, singleCourseDays: singleCourseDays ?? [] }).run();
     }
-    if (slots.length) tx.insert(mealSlots).values(slots.map((s) => ({ ...s, id: randomUUID(), planId }))).run();
+
+    const old = tx
+      .select({ id: mealSlots.id, date: mealSlots.date, meal: mealSlots.meal, course: mealSlots.course })
+      .from(mealSlots)
+      .where(eq(mealSlots.planId, planId))
+      .all();
+    const oldByKey = new Map(old.map((o) => [slotKey(o), o.id]));
+    const kept = new Set<string>();
+    for (const s of slots) {
+      const id = oldByKey.get(slotKey(s));
+      if (id) {
+        tx.update(mealSlots).set({ recipeId: s.recipeId, freeText: s.freeText, locked: s.locked }).where(eq(mealSlots.id, id)).run();
+        kept.add(id);
+      } else {
+        tx.insert(mealSlots).values({ ...s, id: randomUUID(), planId }).run();
+      }
+    }
+    const removed = old.filter((o) => !kept.has(o.id)).map((o) => o.id);
+    if (removed.length) tx.delete(mealSlots).where(inArray(mealSlots.id, removed)).run();
     return planId;
   });
 }

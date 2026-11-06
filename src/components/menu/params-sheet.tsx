@@ -13,11 +13,18 @@ import { MEAL_LABELS, MEALS, type Meal, type PlanParams } from "@/lib/domain/men
 const TIME_OPTIONS: (number | null)[] = [20, 30, 45, 60, 90, null];
 const timeLabel = (m: number | null) => (m === null ? "Sin límite" : `Hasta ${m} min`);
 
-/** Resumen corto de los parámetros: "2 personas · comida y cena · ≤45 min". */
+/** "comida (1º y 2º) y cena", "solo cena"… */
+function mealsSummary(p: PlanParams): string {
+  const lunch = p.lunchCourses === "dos" ? "comida (1º y 2º)" : "comida";
+  if (p.meals.length === 2) return `${lunch} y cena`;
+  return p.meals[0] === "comida" ? `solo ${lunch}` : `solo ${MEAL_LABELS[p.meals[0]].toLowerCase()}`;
+}
+
+/** Resumen corto de los parámetros: "2 personas · comida (1º y 2º) y cena · ≤45 min". */
 export function paramsSummary(p: PlanParams): string {
   const parts = [
     `${p.people} ${p.people === 1 ? "persona" : "personas"}`,
-    p.meals.length === 2 ? "comida y cena" : `solo ${MEAL_LABELS[p.meals[0]].toLowerCase()}`,
+    mealsSummary(p),
   ];
   if (p.maxMinutesWeekday) parts.push(`≤${p.maxMinutesWeekday} min entre semana`);
   if (p.vegetarian) parts.push("vegetariano");
@@ -103,6 +110,21 @@ export function ParamsSheet({
               ))}
             </div>
           </div>
+          {p.meals.includes("comida") && (
+            <div className="px-4 py-3">
+              <p className="mb-2 text-[17px]">Comida</p>
+              <Segmented
+                label="Platos de la comida"
+                value={p.lunchCourses}
+                onChange={(v) => set("lunchCourses", v)}
+                options={[
+                  { value: "dos", label: "Primero y segundo" },
+                  { value: "unico", label: "Plato único" },
+                ]}
+              />
+              <p className="mt-2 text-[13px] leading-snug text-muted">Cualquier día suelto puedes cambiarlo desde el propio plato del menú.</p>
+            </div>
+          )}
           <TimeRow label="Entre semana" value={p.maxMinutesWeekday} onChange={(v) => set("maxMinutesWeekday", v)} />
           <TimeRow label="Fin de semana" value={p.maxMinutesWeekend} onChange={(v) => set("maxMinutesWeekend", v)} />
         </div>

@@ -3,7 +3,7 @@
  */
 import { connection } from "next/server";
 import { addDays, dayLabel, isIsoDate, isWeekend, mondayOf, todayIso, weekDays, weekRangeLabel, type IsoDate } from "@/lib/domain/dates";
-import { classifyRecipe, type Category, type Meal, type PlanParams } from "@/lib/domain/menu";
+import { classifyRecipe, type Category, type Course, type Meal, type PlanParams } from "@/lib/domain/menu";
 import { warningsFor } from "@/lib/domain/menu-planner";
 import { totalMinutes } from "@/lib/domain/recipe";
 import { cookedSlotIds } from "@/lib/history/repo";
@@ -22,6 +22,7 @@ export interface SlotView {
   id: string;
   date: IsoDate;
   meal: Meal;
+  course: Course;
   locked: boolean;
   /** Ya marcado como cocinado. */
   cooked: boolean;
@@ -71,7 +72,7 @@ export async function loadMenuView(weekParam: string | undefined): Promise<MenuV
   if (plan) {
     const stats: Partial<Record<Category, number>> = {};
     const cost = { total: 0, priced: 0, dishes: 0 };
-    const cooked = cookedSlotIds(plan.slots.map((s) => s.id));
+    const cooked = cookedSlotIds(plan.slots);
     const slotsView: SlotView[] = plan.slots.map((s) => {
       const recipe = s.recipeId ? (byId.get(s.recipeId) ?? null) : null;
       if (recipe) {
@@ -83,14 +84,14 @@ export async function loadMenuView(weekParam: string | undefined): Promise<MenuV
           cost.priced++;
         }
       }
-      return { id: s.id, date: s.date, meal: s.meal, locked: s.locked, cooked: cooked.has(s.id), freeText: s.freeText, recipe };
+      return { id: s.id, date: s.date, meal: s.meal, course: s.course, locked: s.locked, cooked: cooked.has(s.id), freeText: s.freeText, recipe };
     });
     const warnings = warningsFor(
       {
         recipes,
         params: plan.params,
         // Huecos con texto libre ("Sobras") son fijos y vacíos a propósito.
-        slots: plan.slots.map((s) => ({ date: s.date, meal: s.meal, weekend: isWeekend(s.date), ...(s.freeText ? { fixed: null } : {}) })),
+        slots: plan.slots.map((s) => ({ date: s.date, meal: s.meal, course: s.course, weekend: isWeekend(s.date), ...(s.freeText ? { fixed: null } : {}) })),
       },
       plan.slots.map((s) => s.recipeId),
     );

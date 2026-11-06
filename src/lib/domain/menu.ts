@@ -20,9 +20,16 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   verdura: "Verdura",
 };
 
+/** Platos de un hueco del menú: comida con primero y segundo, o plato único. */
+export const COURSES = ["primero", "segundo", "unico"] as const;
+export type Course = (typeof COURSES)[number];
+export const COURSE_LABELS: Record<Course, string> = { primero: "Primero", segundo: "Segundo", unico: "Plato único" };
+
 export const planParamsSchema = z.object({
   people: z.number().int().min(1).max(20),
   meals: z.array(z.enum(MEALS)).min(1),
+  /** Comida con primero y segundo (lo habitual) o plato único. La cena es siempre un plato. */
+  lunchCourses: z.enum(["dos", "unico"]),
   /** Minutos máximos por plato; null = sin límite. */
   maxMinutesWeekday: z.number().int().min(10).max(600).nullable(),
   maxMinutesWeekend: z.number().int().min(10).max(600).nullable(),
@@ -36,6 +43,7 @@ export type PlanParams = z.infer<typeof planParamsSchema>;
 export const DEFAULT_PARAMS: PlanParams = {
   people: 2,
   meals: ["comida", "cena"],
+  lunchCourses: "dos",
   maxMinutesWeekday: 45,
   maxMinutesWeekend: null,
   budget: "normal",
@@ -54,6 +62,7 @@ const KEYWORDS: Record<Exclude<Category, "verdura">, string[]> = {
   carne: [
     "pollo", "pavo", "ternera", "vaca", "buey", "cerdo", "cordero", "conejo", "carne", "chorizo", "jamon", "bacon", "beicon",
     "panceta", "salchicha", "morcilla", "lomo", "costilla", "solomillo", "secreto", "presa", "hamburguesa", "albondiga", "pechuga", "muslo", "contramuslo",
+    "morcillo", "tocino", "lacon", "codillo", "cecina", "carrillada", "rabo", "oreja", "chistorra", "butifarra",
   ],
   huevo: ["huevo"],
   pasta_arroz: ["pasta", "macarron", "espagueti", "spaghetti", "tallarin", "fideo", "lasana", "canelon", "arroz", "risotto", "noodle", "cuscus", "quinoa", "gnocchi", "nyoqui"],
@@ -110,4 +119,45 @@ export function hasMeatOrFish(r: ClassifiableRecipe): boolean {
     // "caldo de pollo" también cuenta: un vegetariano no lo quiere
     return t.some((tok) => KEYWORDS.carne.includes(tok) || KEYWORDS.pescado.includes(tok));
   });
+}
+
+// ---------------------------------------------------------------- primero / segundo
+
+/** Platos de los huecos de una comida según su estructura. */
+export function lunchCourses(twoCourses: boolean): Course[] {
+  return twoCourses ? ["primero", "segundo"] : ["unico"];
+}
+
+/**
+ * Papel natural de una receta en una comida española:
+ *  - primero: legumbres, verduras, cremas, pasta, arroz, ensaladas
+ *  - segundo: carne, pescado, huevos
+ * Las etiquetas "primero", "segundo" o "plato único" mandan.
+ */
+export function courseRole(r: ClassifiableRecipe): Course {
+  if (r.tags.includes("plato único") || r.tags.includes("plato unico")) return "unico";
+  if (r.tags.includes("primero")) return "primero";
+  if (r.tags.includes("segundo")) return "segundo";
+  const cat = classifyRecipe(r);
+  return cat === "carne" || cat === "pescado" || cat === "huevo" ? "segundo" : "primero";
+}
+
+/**
+ * ¿Puede ir esta receta en esa comida? Etiquetas "comida" / "cena":
+ * con solo una de ellas, la receta es exclusiva de esa comida; con las dos
+ * o con ninguna, vale para cualquiera.
+ */
+export function fitsMeal(r: { tags: string[] }, meal: Meal): boolean {
+  const lunch = r.tags.includes("comida");
+  const dinner = r.tags.includes("cena");
+  if (lunch === dinner) return true;
+  return meal === "comida" ? lunch : dinner;
+}
+
+/** ¿Es un plato completo, apropiado como plato único? (cocido, lentejas con chorizo…) */
+export function isWholeMeal(r: ClassifiableRecipe): boolean {
+  if (courseRole(r) === "unico") return true;
+  const cat = classifyRecipe(r);
+  // Legumbre, pasta o arroz con carne o pescado: plato completo
+  return (cat === "legumbre" || cat === "pasta_arroz") && hasMeatOrFish(r);
 }

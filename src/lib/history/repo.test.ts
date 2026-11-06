@@ -47,7 +47,9 @@ describe("histórico", () => {
     addCookLog({ recipeId: id, cookedOn: slot.date, slotId: slot.id, rating: 4 }, db);
     addCookLog({ recipeId: id, cookedOn: slot.date, slotId: slot.id, rating: 5 }, db);
     expect(listCookLogs(100, db)).toHaveLength(1);
-    expect(cookedSlotIds([slot.id], db).has(slot.id)).toBe(true);
+    expect(cookedSlotIds([{ id: slot.id, recipeId: id }], db).has(slot.id)).toBe(true);
+    // Si el hueco cambia de plato, deja de contar como cocinado
+    expect(cookedSlotIds([{ id: slot.id, recipeId: "otra" }], db).has(slot.id)).toBe(false);
   });
 
   it("borrar la receta conserva el histórico con su título", () => {

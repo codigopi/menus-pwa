@@ -8,7 +8,7 @@ import { DEFAULT_PARAMS } from "@/lib/domain/menu";
 import { recipeInputSchema } from "@/lib/domain/recipe";
 import { createRecipe, deleteRecipe } from "@/lib/recipes/repo";
 import { getPlan, latestParams, recentRecipes, saveParams, updateSlot } from "./repo";
-import { generateWeek, regenerateSlot } from "./service";
+import { generateWeek, regenerateSlot, setDaySingleCourse } from "./service";
 
 let db: AppDb;
 
@@ -39,14 +39,52 @@ beforeEach(() => {
 });
 
 describe("servicio de menú", () => {
-  it("genera 14 huecos y guarda los parámetros", () => {
+  it("por defecto: comida con primero y segundo + cena (21 platos)", () => {
     generateWeek("2026-11-02", { ...DEFAULT_PARAMS, people: 3 }, 1, db);
     const plan = getPlan("2026-11-02", db)!;
-    expect(plan.slots).toHaveLength(14);
-    expect(plan.slots[0]).toMatchObject({ date: "2026-11-02", meal: "comida" });
-    expect(plan.slots[1]).toMatchObject({ date: "2026-11-02", meal: "cena" });
+    expect(plan.slots).toHaveLength(21);
+    expect(plan.slots.slice(0, 3)).toMatchObject([
+      { date: "2026-11-02", meal: "comida", course: "primero" },
+      { date: "2026-11-02", meal: "comida", course: "segundo" },
+      { date: "2026-11-02", meal: "cena", course: "unico" },
+    ]);
     expect(plan.slots.every((s) => s.recipeId)).toBe(true);
     expect(latestParams(db).people).toBe(3);
+  });
+
+  it("comida de plato único en ajustes: 14 platos", () => {
+    generateWeek("2026-11-02", { ...DEFAULT_PARAMS, lunchCourses: "unico" }, 1, db);
+    const plan = getPlan("2026-11-02", db)!;
+    expect(plan.slots).toHaveLength(14);
+    expect(plan.slots.every((s) => s.course === "unico")).toBe(true);
+  });
+
+  it("un día concreto de plato único (y vuelta a dos platos) sin tocar el resto", () => {
+    generateWeek("2026-11-02", DEFAULT_PARAMS, 1, db);
+    const before = getPlan("2026-11-02", db)!;
+    setDaySingleCourse("2026-11-02", "2026-11-07", true, 5, db);
+    const after = getPlan("2026-11-02", db)!;
+    expect(after.singleCourseDays).toEqual(["2026-11-07"]);
+    expect(after.slots).toHaveLength(20);
+    const saturday = after.slots.filter((s) => s.date === "2026-11-07" && s.meal === "comida");
+    expect(saturday).toMatchObject([{ course: "unico" }]);
+    expect(saturday[0].recipeId).not.toBeNull();
+    // El resto de la semana, intacto (mismos huecos y recetas)
+    const others = (p: typeof before) => p.slots.filter((s) => !(s.date === "2026-11-07" && s.meal === "comida")).map((s) => `${s.id}:${s.recipeId}`);
+    expect(others(after)).toEqual(others(before));
+
+    // Se recuerda al regenerar y se puede deshacer
+    generateWeek("2026-11-02", DEFAULT_PARAMS, 9, db);
+    expect(getPlan("2026-11-02", db)!.slots.filter((s) => s.date === "2026-11-07" && s.meal === "comida")).toHaveLength(1);
+    setDaySingleCourse("2026-11-02", "2026-11-07", false, 5, db);
+    expect(getPlan("2026-11-02", db)!.slots.filter((s) => s.date === "2026-11-07" && s.meal === "comida").map((s) => s.course)).toEqual(["primero", "segundo"]);
+  });
+
+  it("regenerar conserva el id de los huecos (no se pierde el «cocinado»)", () => {
+    generateWeek("2026-11-02", DEFAULT_PARAMS, 1, db);
+    const ids = getPlan("2026-11-02", db)!.slots.map((s) => s.id);
+    generateWeek("2026-11-02", DEFAULT_PARAMS, 2, db);
+    expect(getPlan("2026-11-02", db)!.slots.map((s) => s.id)).toEqual(ids);
   });
 
   it("al regenerar conserva los huecos bloqueados (receta o texto)", () => {

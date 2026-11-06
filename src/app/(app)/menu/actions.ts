@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { isIsoDate, mondayOf } from "@/lib/domain/dates";
 import { planParamsSchema, type PlanParams } from "@/lib/domain/menu";
 import * as repo from "@/lib/menu/repo";
-import { generateWeek, regenerateSlot } from "@/lib/menu/service";
+import { generateWeek, regenerateSlot, setDaySingleCourse } from "@/lib/menu/service";
 import { getRecipe } from "@/lib/recipes/repo";
 
 const done = () => revalidatePath("/menu");
@@ -39,6 +39,14 @@ export async function saveMenuParams(weekStart: string, params: PlanParams): Pro
 
 export async function regenerateMenuSlot(slotId: string): Promise<void> {
   regenerateSlot(slotId, seed());
+  done();
+}
+
+/** Comida de ese día: plato único (true) o primero y segundo (false). */
+export async function setDayCourses(slotId: string, single: boolean): Promise<void> {
+  const found = repo.getSlot(slotId);
+  if (!found) return;
+  setDaySingleCourse(found.weekStart, found.slot.date, Boolean(single), seed());
   done();
 }
 

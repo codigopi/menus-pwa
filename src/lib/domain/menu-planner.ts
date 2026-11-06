@@ -7,7 +7,7 @@
  * para el equilibrio.
  */
 import { ingredientMatches } from "./matching";
-import { classifyRecipe, hasMeatOrFish, type Category, type Meal, type PlanParams } from "./menu";
+import { classifyRecipe, courseRole, fitsMeal, hasMeatOrFish, isWholeMeal, type Category, type Course, type Meal, type PlanParams } from "./menu";
 import { totalMinutes } from "./recipe";
 
 export interface PlannerRecipe {
@@ -28,6 +28,8 @@ export interface PlannerRecipe {
 export interface PlannerSlot {
   date: string;
   meal: Meal;
+  /** Primero, segundo o plato único (por defecto, plato único). */
+  course?: Course;
   weekend: boolean;
   /** Receta fija (bloqueada/elegida a mano). `undefined` = hueco a rellenar. */
   fixed?: string | null;
@@ -98,6 +100,8 @@ function isLight(r: PlannerRecipe, cat: Category): boolean {
 interface Context {
   recipes: PlannerRecipe[];
   categories: Map<string, Category>;
+  roles: Map<string, Course>;
+  wholeMeals: Set<string>;
   slots: PlannerSlot[];
   assignments: (string | null)[];
   params: PlanParams;
@@ -136,6 +140,9 @@ function score(r: PlannerRecipe, index: number, ctx: Context): number {
     s += 1;
   }
 
+  // Comida de plato único: mejor un plato completo (cocido, lentejas con chorizo…)
+  if (slot.meal === "comida" && (slot.course ?? "unico") === "unico" && ctx.wholeMeals.has(r.id)) s += 2;
+
   // Tiempo: entre semana mejor rápido
   const total = totalMinutes(r);
   if (!slot.weekend && total !== null && total > 45) s -= 1;
@@ -170,10 +177,26 @@ function score(r: PlannerRecipe, index: number, ctx: Context): number {
 function pick(index: number, ctx: Context, exclude: Set<string>): string | null {
   const slot = ctx.slots[index];
   const used = new Set(ctx.assignments.filter((id, i) => i !== index && id) as string[]);
-  const fitting = ctx.recipes.filter((r) => fitsTime(r, slot, ctx.params) && !exclude.has(r.id));
+  const usable = ctx.recipes.filter((r) => fitsTime(r, slot, ctx.params) && !exclude.has(r.id));
+  // Etiquetas "comida"/"cena": recetas exclusivas de una comida (si queda alguna)
+  const forMeal = usable.filter((r) => fitsMeal(r, slot.meal));
+  const available = forMeal.length > 0 ? forMeal : usable;
+  // Primero/segundo: recetas de ese papel; si no hay ninguna, cualquiera (mejor algo que nada)
+  const course = slot.course ?? "unico";
+  const byRole = course === "unico" ? available : available.filter((r) => ctx.roles.get(r.id) === course);
+  const fitting = byRole.length > 0 ? byRole : available;
 
   // 1ª opción: recetas no usadas esta semana. Si no quedan, se permite repetir.
-  for (const pool of [fitting.filter((r) => !used.has(r.id)), fitting]) {
+  // En la cena, antes que un plato contundente sin usar (cocido, lentejas…)
+  // es mejor repetir algo ligero.
+  const unused = fitting.filter((r) => !used.has(r.id));
+  const heavyAtNight = (r: PlannerRecipe) =>
+    ctx.categories.get(r.id) === "legumbre" || r.tags.includes("cuchara") || ctx.wholeMeals.has(r.id);
+  const pools =
+    slot.meal === "cena"
+      ? [unused.filter((r) => !heavyAtNight(r)), fitting.filter((r) => !heavyAtNight(r)), unused, fitting]
+      : [unused, fitting];
+  for (const pool of pools) {
     if (pool.length === 0) continue;
     let best: { id: string; s: number } | null = null;
     for (const r of pool) {
@@ -190,6 +213,8 @@ function buildContext(input: PlanInput, assignments: (string | null)[]): Context
   return {
     recipes,
     categories: new Map(input.recipes.map((r) => [r.id, classifyRecipe(r)])),
+    roles: new Map(input.recipes.map((r) => [r.id, courseRole(r)])),
+    wholeMeals: new Set(input.recipes.filter(isWholeMeal).map((r) => r.id)),
     slots: input.slots,
     assignments,
     params: input.params,
@@ -247,5 +272,9 @@ function planWarnings(input: PlanInput, ctx: Context): string[] {
   const available = new Set(ctx.recipes.map((r) => ctx.categories.get(r.id)));
   if (!available.has("pescado") && !input.params.vegetarian) warnings.push("No tienes recetas de pescado: añade alguna para equilibrar la semana.");
   if (!available.has("legumbre")) warnings.push("No tienes recetas de legumbres: añade alguna para equilibrar la semana.");
+  const courses = new Set(input.slots.map((s) => s.course ?? "unico"));
+  const roles = new Set(ctx.recipes.map((r) => ctx.roles.get(r.id)));
+  if (courses.has("primero") && !roles.has("primero")) warnings.push("No tienes recetas de primero (legumbres, verduras, cremas, pasta, arroz): se usan otras.");
+  if (courses.has("segundo") && !roles.has("segundo")) warnings.push("No tienes recetas de segundo (carne, pescado, huevos): se usan otras.");
   return warnings;
 }

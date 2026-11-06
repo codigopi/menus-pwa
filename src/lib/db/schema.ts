@@ -10,7 +10,7 @@
 import { sql } from "drizzle-orm";
 import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import type { Section } from "@/lib/domain/catalog";
-import type { Meal, PlanParams } from "@/lib/domain/menu";
+import type { Course, Meal, PlanParams } from "@/lib/domain/menu";
 import type { RecipeStep, SourceType } from "@/lib/domain/recipe";
 
 const timestamps = {
@@ -75,6 +75,8 @@ export const mealPlans = sqliteTable("meal_plans", {
   id: text("id").primaryKey(),
   weekStart: text("week_start").notNull().unique(),
   params: text("params", { mode: "json" }).$type<PlanParams>().notNull(),
+  /** Días de esta semana en que la comida es de plato único (aunque lo normal sean dos). */
+  singleCourseDays: text("single_course_days", { mode: "json" }).$type<string[]>().notNull().default(sql`'[]'`),
   ...timestamps,
 });
 
@@ -91,12 +93,14 @@ export const mealSlots = sqliteTable(
       .references(() => mealPlans.id, { onDelete: "cascade" }),
     date: text("date").notNull(),
     meal: text("meal").$type<Meal>().notNull(),
+    /** Primero, segundo o plato único. */
+    course: text("course").$type<Course>().notNull().default("unico"),
     recipeId: text("recipe_id").references(() => recipes.id, { onDelete: "set null" }),
     freeText: text("free_text"),
     locked: integer("locked", { mode: "boolean" }).notNull().default(false),
   },
   (t) => [
-    uniqueIndex("meal_slots_unique").on(t.planId, t.date, t.meal),
+    uniqueIndex("meal_slots_unique_course").on(t.planId, t.date, t.meal, t.course),
     index("meal_slots_recipe_idx").on(t.recipeId),
     index("meal_slots_date_idx").on(t.date),
   ],

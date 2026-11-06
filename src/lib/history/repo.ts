@@ -89,10 +89,13 @@ export function cookedRecently(before: IsoDate, days = 14, db: AppDb = getDb()):
   return map;
 }
 
-/** Huecos del menú ya marcados como cocinados. */
-export function cookedSlotIds(slotIds: string[], db: AppDb = getDb()): Set<string> {
-  if (slotIds.length === 0) return new Set();
-  const rows = db.select({ slotId: cookLogs.slotId }).from(cookLogs).where(isNotNull(cookLogs.slotId)).all();
-  const wanted = new Set(slotIds);
-  return new Set(rows.map((r) => r.slotId!).filter((id) => wanted.has(id)));
+/**
+ * Huecos del menú ya marcados como cocinados. Solo cuentan si el hueco sigue
+ * teniendo la misma receta que se cocinó (al regenerar, el hueco cambia de plato).
+ */
+export function cookedSlotIds(slots: { id: string; recipeId: string | null }[], db: AppDb = getDb()): Set<string> {
+  if (slots.length === 0) return new Set();
+  const rows = db.select({ slotId: cookLogs.slotId, recipeId: cookLogs.recipeId }).from(cookLogs).where(isNotNull(cookLogs.slotId)).all();
+  const cooked = new Set(rows.map((r) => `${r.slotId}|${r.recipeId}`));
+  return new Set(slots.filter((s) => s.recipeId && cooked.has(`${s.id}|${s.recipeId}`)).map((s) => s.id));
 }

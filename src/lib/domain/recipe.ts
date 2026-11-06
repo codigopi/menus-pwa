@@ -30,6 +30,11 @@ export const SOURCE_LABELS: Record<SourceType, string> = {
 
 /** Etiquetas sugeridas en el formulario (el usuario puede crear otras). */
 export const SUGGESTED_TAGS = [
+  "comida",
+  "cena",
+  "primero",
+  "segundo",
+  "plato único",
   "cuchara",
   "legumbres",
   "verdura",

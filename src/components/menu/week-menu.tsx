@@ -6,6 +6,7 @@ import {
   deleteMenu,
   generateMenu,
   regenerateMenuSlot,
+  setDayCourses,
   saveMenuParams,
   setSlotFreeText,
   setSlotRecipe,
@@ -19,7 +20,8 @@ import { cn } from "@/components/ui/cn";
 import { PageHeader } from "@/components/ui/page-header";
 import { Sheet } from "@/components/ui/sheet";
 import { WeekNav } from "@/components/ui/week-nav";
-import { CATEGORIES, CATEGORY_LABELS, MEAL_LABELS, type PlanParams } from "@/lib/domain/menu";
+import { CATEGORIES, CATEGORY_LABELS, type PlanParams } from "@/lib/domain/menu";
+import { slotLabel } from "./slot-label";
 import { formatMinutes } from "@/lib/domain/recipe";
 import type { MenuView, SlotView } from "@/lib/menu/view";
 import { CategoryDot } from "./category";
@@ -77,6 +79,7 @@ export function WeekMenu({ view }: { view: MenuView }) {
     setRecipe: onSlot(setSlotRecipe),
     setFreeText: onSlot(setSlotFreeText),
     cook: (slot) => setCookSlot(slot),
+    setDayCourses: onSlot(setDayCourses),
   };
 
   const openDay = plan?.days.find((d) => d.slots.some((s) => s.id === openSlot?.id));
@@ -199,6 +202,7 @@ export function WeekMenu({ view }: { view: MenuView }) {
       <SlotSheet
         slot={openSlot}
         dayLabel={openDay?.label ?? ""}
+        twoCourseLunch={plan?.params.lunchCourses === "dos"}
         library={view.library}
         actions={actions}
         onClose={() => setOpenSlot(null)}
@@ -256,7 +260,7 @@ function SlotRow({ slot, busy, onOpen }: { slot: SlotView; busy: boolean; onOpen
       onClick={onOpen}
       className={cn("flex w-full items-center gap-3 px-4 py-2.5 text-left transition-opacity active:bg-fill", busy && "animate-pulse opacity-50")}
     >
-      <span className="w-14 shrink-0 text-[13px] font-medium text-muted">{MEAL_LABELS[slot.meal]}</span>
+      <span className="w-16 shrink-0 text-[13px] font-medium text-muted">{slotLabel(slot)}</span>
       {r ? (
         <>
           <RecipePhoto photo={r.photo} title={r.title} className="size-11 shrink-0 rounded-lg" />

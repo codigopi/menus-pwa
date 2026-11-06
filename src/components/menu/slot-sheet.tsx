@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
-import { BookOpen, ChefHat, ChevronLeft, CircleSlash, Lock, LockOpen, Search, Shuffle, Soup, Utensils } from "lucide-react";
+import { BookOpen, ChefHat, ChevronLeft, CircleSlash, Lock, LockOpen, Rows2, Search, Shuffle, Soup, Utensils } from "lucide-react";
 import { RecipePhoto } from "@/components/recipes/recipe-photo";
 import { cn } from "@/components/ui/cn";
 import { Sheet } from "@/components/ui/sheet";
 import { fold } from "@/lib/domain/matching";
-import { MEAL_LABELS } from "@/lib/domain/menu";
+import { slotLabel } from "./slot-label";
 import { formatMinutes } from "@/lib/domain/recipe";
 import type { MenuRecipe, SlotView } from "@/lib/menu/view";
 import { CategoryLabel } from "./category";
@@ -15,6 +15,8 @@ import { CategoryLabel } from "./category";
 export interface SlotActions {
   /** Abre la hoja "Lo he cocinado" para este hueco. */
   cook: (slot: SlotView) => void;
+  /** Comida de ese día: plato único (true) o primero y segundo (false). */
+  setDayCourses: (slotId: string, single: boolean) => void;
   regenerate: (slotId: string) => void;
   toggleLock: (slotId: string) => void;
   setRecipe: (slotId: string, recipeId: string) => void;
@@ -25,12 +27,15 @@ export interface SlotActions {
 export function SlotSheet({
   slot,
   dayLabel,
+  twoCourseLunch = true,
   library,
   actions,
   onClose,
 }: {
   slot: SlotView | null;
   dayLabel: string;
+  /** La comida es de primero y segundo por defecto (ajustes). */
+  twoCourseLunch?: boolean;
   library: MenuRecipe[];
   actions: SlotActions;
   onClose: () => void;
@@ -105,7 +110,7 @@ export function SlotSheet({
               {slot.recipe && <RecipePhoto photo={slot.recipe.photo} title={slot.recipe.title} className="size-11 shrink-0 rounded-lg" />}
               <div className="min-w-0">
                 <p className="text-[13px] text-muted">
-                  {dayLabel} · {MEAL_LABELS[slot.meal]}
+                  {dayLabel} · {slotLabel(slot)}
                 </p>
                 <p className="truncate text-[16px] font-semibold">{slot.recipe?.title ?? slot.freeText ?? "Sin plato"}</p>
               </div>
@@ -138,6 +143,11 @@ export function SlotSheet({
             <SheetButton icon={<Utensils className="size-5" />} onClick={run(() => actions.setFreeText(slot.id, "Comer fuera"))}>
               Comer fuera
             </SheetButton>
+            {slot.meal === "comida" && twoCourseLunch && (
+              <SheetButton icon={<Rows2 className="size-5" />} onClick={run(() => actions.setDayCourses(slot.id, slot.course !== "unico"))}>
+                {slot.course === "unico" ? "Primero y segundo este día" : "Plato único este día"}
+              </SheetButton>
+            )}
             <SheetButton icon={<CircleSlash className="size-5" />} onClick={run(() => actions.setFreeText(slot.id, null))} muted>
               Dejar vacío
             </SheetButton>

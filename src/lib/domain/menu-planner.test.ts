@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { addDays, dayLabel, daysBetween, isIsoDate, isWeekend, mondayOf, todayIso, weekDays, weekRangeLabel } from "./dates";
-import { classifyRecipe, DEFAULT_PARAMS, hasMeatOrFish, type Meal, type PlanParams } from "./menu";
+import { classifyRecipe, courseRole, DEFAULT_PARAMS, fitsMeal, hasMeatOrFish, isWholeMeal, type Meal, type PlanParams } from "./menu";
 import { allowedRecipes, planWeek, replanSlot, type PlannerRecipe, type PlannerSlot } from "./menu-planner";
 
 // ---------------------------------------------------------------- fechas
@@ -190,6 +190,98 @@ describe("planWeek", () => {
 
   it("allowedRecipes descarta recetas sin ingredientes", () => {
     expect(allowedRecipes([rec("vacia", [])], params())).toEqual([]);
+  });
+});
+
+describe("primero y segundo", () => {
+  // Comida con primero y segundo + cena, como en una casa española
+  const courseWeek = (singleDays: string[] = []): PlannerSlot[] =>
+    weekDays("2026-11-02").flatMap((date) => [
+      ...(singleDays.includes(date)
+        ? [{ date, meal: "comida" as const, course: "unico" as const, weekend: isWeekend(date) }]
+        : [
+            { date, meal: "comida" as const, course: "primero" as const, weekend: isWeekend(date) },
+            { date, meal: "comida" as const, course: "segundo" as const, weekend: isWeekend(date) },
+          ]),
+      { date, meal: "cena" as const, course: "unico" as const, weekend: isWeekend(date) },
+    ]);
+
+  it("courseRole: legumbre/verdura/pasta de primero; carne/pescado/huevo de segundo; la etiqueta manda", () => {
+    expect(courseRole({ tags: [], ingredients: [{ name: "lentejas" }] })).toBe("primero");
+    expect(courseRole({ tags: [], ingredients: [{ name: "macarrones" }] })).toBe("primero");
+    expect(courseRole({ tags: [], ingredients: [{ name: "merluza" }] })).toBe("segundo");
+    expect(courseRole({ tags: [], ingredients: [{ name: "huevos" }] })).toBe("segundo");
+    expect(courseRole({ tags: ["segundo"], ingredients: [{ name: "calabacín" }] })).toBe("segundo");
+    expect(courseRole({ tags: ["plato único"], ingredients: [{ name: "arroz" }] })).toBe("unico");
+    expect(isWholeMeal({ tags: [], ingredients: [{ name: "garbanzos" }, { name: "morcillo" }] })).toBe(true);
+    expect(isWholeMeal({ tags: [], ingredients: [{ name: "garbanzos" }, { name: "espinacas" }] })).toBe(false);
+  });
+
+  it("los primeros son de primero y los segundos de segundo, sin repetir tipo el mismo día", () => {
+    const slots = courseWeek();
+    const { assignments } = planWeek({ recipes: LIBRARY, slots, params: params({ maxMinutesWeekday: null }), seed: 3 });
+    expect(slots).toHaveLength(21);
+    slots.forEach((slot, i) => {
+      const r = LIBRARY.find((x) => x.id === assignments[i])!;
+      if (slot.course === "primero") expect(courseRole(r)).toBe("primero");
+      if (slot.course === "segundo") expect(courseRole(r)).toBe("segundo");
+    });
+    // Mismo día: primero y segundo de distinto tipo
+    for (let d = 0; d < 7; d++) {
+      const [p, s] = [assignments[d * 3], assignments[d * 3 + 1]].map((id) => classifyRecipe(LIBRARY.find((x) => x.id === id)!));
+      expect(p).not.toBe(s);
+    }
+  });
+
+  it("el día de plato único prefiere un plato completo", () => {
+    let whole = 0;
+    for (const seed of [1, 2, 3, 4, 5, 6]) {
+      const slots = courseWeek(["2026-11-07"]); // sábado, plato único
+      const { assignments } = planWeek({ recipes: LIBRARY, slots, params: params({ maxMinutesWeekend: null }), seed });
+      const idx = slots.findIndex((s) => s.date === "2026-11-07" && s.meal === "comida");
+      expect(slots[idx].course).toBe("unico");
+      if (isWholeMeal(LIBRARY.find((r) => r.id === assignments[idx])!)) whole++;
+    }
+    expect(whole).toBeGreaterThanOrEqual(4); // lentejas con chorizo, cocido…
+  });
+
+  it("etiquetas comida/cena: recetas exclusivas de una comida", () => {
+    expect(fitsMeal({ tags: ["cena"] }, "comida")).toBe(false);
+    expect(fitsMeal({ tags: ["cena"] }, "cena")).toBe(true);
+    expect(fitsMeal({ tags: ["comida", "cena"] }, "comida")).toBe(true);
+    expect(fitsMeal({ tags: [] }, "cena")).toBe(true);
+
+    // La tortilla, solo para cenas; los macarrones, solo para comidas
+    const tagged = LIBRARY.map((r) =>
+      r.id === "tortilla" ? { ...r, tags: ["cena"] } : r.id === "macarrones" ? { ...r, tags: ["comida"] } : r,
+    );
+    for (const seed of [1, 2, 3, 4]) {
+      const slots = courseWeek();
+      const { assignments } = planWeek({ recipes: tagged, slots, params: params({ maxMinutesWeekday: null }), seed });
+      assignments.forEach((id, i) => {
+        if (id === "tortilla") expect(slots[i].meal).toBe("cena");
+        if (id === "macarrones") expect(slots[i].meal).toBe("comida");
+      });
+    }
+  });
+
+  it("con pocas recetas, en la cena repite algo ligero antes que un plato contundente", () => {
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const slots = courseWeek();
+      const { assignments } = planWeek({ recipes: LIBRARY, slots, params: params({ maxMinutesWeekday: null, maxMinutesWeekend: null }), seed });
+      assignments.forEach((id, i) => {
+        if (slots[i].meal !== "cena") return;
+        const r = LIBRARY.find((x) => x.id === id)!;
+        expect(classifyRecipe(r) === "legumbre" || r.tags.includes("cuchara"), `${id} de cena`).toBe(false);
+      });
+    }
+  });
+
+  it("si no hay recetas de segundo, usa otras y avisa", () => {
+    const onlyFirsts = LIBRARY.filter((r) => courseRole(r) === "primero");
+    const { assignments, warnings } = planWeek({ recipes: onlyFirsts, slots: courseWeek(), params: params({ maxMinutesWeekday: null }), seed: 1 });
+    expect(assignments.every(Boolean)).toBe(true);
+    expect(warnings.some((w) => w.includes("segundo"))).toBe(true);
   });
 });
 
