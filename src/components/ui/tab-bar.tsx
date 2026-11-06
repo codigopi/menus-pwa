@@ -44,6 +44,14 @@ function Bar({ pathname }: { pathname: string | null }) {
             <li key={href} className="flex-1">
               <Link
                 href={href}
+                // Sin conexión, la navegación interna fallaría: recarga completa
+                // para que el service worker sirva la copia guardada.
+                onClick={(e) => {
+                  if (!navigator.onLine) {
+                    e.preventDefault();
+                    window.location.href = href;
+                  }
+                }}
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[10px] font-medium transition-colors",

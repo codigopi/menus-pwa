@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useTransition } from "react";
-import { AlertTriangle, CalendarDays, ChevronLeft, ChevronRight, Lock, Plus, RefreshCw, SlidersHorizontal, Soup, Trash2, Utensils, X } from "lucide-react";
+import { AlertTriangle, CalendarDays, Lock, Plus, RefreshCw, SlidersHorizontal, Soup, Trash2, Utensils, X } from "lucide-react";
 import {
   deleteMenu,
   generateMenu,
@@ -12,11 +11,13 @@ import {
   setSlotRecipe,
   toggleSlotLock,
 } from "@/app/(app)/menu/actions";
+import { CachePage } from "@/components/pwa/cache-page";
 import { RecipePhoto } from "@/components/recipes/recipe-photo";
 import { Button, LinkButton } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
 import { PageHeader } from "@/components/ui/page-header";
 import { Sheet } from "@/components/ui/sheet";
+import { WeekNav } from "@/components/ui/week-nav";
 import { CATEGORIES, CATEGORY_LABELS, MEAL_LABELS, type PlanParams } from "@/lib/domain/menu";
 import { formatMinutes } from "@/lib/domain/recipe";
 import type { MenuView, SlotView } from "@/lib/menu/view";
@@ -88,21 +89,14 @@ export function WeekMenu({ view }: { view: MenuView }) {
         }
       />
 
-      {/* Navegación por semanas */}
-      <nav className="mb-4 flex items-center justify-between rounded-2xl bg-card px-2 py-1.5" aria-label="Semana">
-        <Link href={`/menu?semana=${view.prevWeek}`} aria-label="Semana anterior" className="tap grid size-10 place-items-center text-accent">
-          <ChevronLeft className="size-6" />
-        </Link>
-        <div className="text-center">
-          <p className="text-[17px] font-semibold">{view.rangeLabel}</p>
-          <p className="text-[12px] text-muted">
-            {view.isCurrentWeek ? "Esta semana" : <Link href="/menu" className="text-accent">Volver a esta semana</Link>}
-          </p>
-        </div>
-        <Link href={`/menu?semana=${view.nextWeek}`} aria-label="Semana siguiente" className="tap grid size-10 place-items-center text-accent">
-          <ChevronRight className="size-6" />
-        </Link>
-      </nav>
+      <CachePage url="/menu" />
+      <WeekNav
+        basePath="/menu"
+        rangeLabel={view.rangeLabel}
+        prevWeek={view.prevWeek}
+        nextWeek={view.nextWeek}
+        isCurrentWeek={view.isCurrentWeek}
+      />
 
       {error && <p role="alert" className="mb-4 rounded-2xl bg-danger/10 px-4 py-3 text-[15px] text-danger">{error}</p>}
 
@@ -133,7 +127,13 @@ export function WeekMenu({ view }: { view: MenuView }) {
         </section>
       ) : (
         <>
-          <p className="mb-2 px-1 text-[13px] text-muted">{paramsSummary(plan.params)}</p>
+          <p className="mb-2 px-1 text-[13px] text-muted">
+            {paramsSummary(plan.params)}
+            {/* Solo si se puede estimar al menos la mitad de los platos */}
+            {plan.cost.priced > 0 && plan.cost.priced * 2 >= plan.cost.dishes && (
+              <> · <span className="text-ink">≈ {Math.round(plan.cost.total)} € la semana</span> (orientativo)</>
+            )}
+          </p>
 
           {unapplied && (
             <div className="mb-4 flex items-center gap-3 rounded-2xl bg-accent-soft p-3 pl-4" role="status">

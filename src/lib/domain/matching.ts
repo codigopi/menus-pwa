@@ -48,8 +48,9 @@ export function fold(s: string): string {
 export function singular(w: string): string {
   if (w.length <= 3) return w;
   if (w.endsWith("ces")) return `${w.slice(0, -3)}z`; // nueces → nuez
-  // Plurales en -es tras consonante: limones → limon, panes → pan
-  if (w.endsWith("es") && /[lnrdjsy]$/.test(w.slice(0, -2)) && w.length > 4) return w.slice(0, -2);
+  // Plurales en -es tras consonante: limones → limon, panes → pan.
+  // (No tras "d": "verdes"/"grandes" son plurales de "verde"/"grande".)
+  if (w.endsWith("es") && /[lnrjsy]$/.test(w.slice(0, -2)) && w.length > 4) return w.slice(0, -2);
   if (w.endsWith("s") && !w.endsWith("ss")) return w.slice(0, -1); // tomates → tomate
   return w;
 }

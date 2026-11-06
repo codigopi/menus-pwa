@@ -6,9 +6,18 @@ import type { AppDb } from "@/lib/db";
 import { getDb } from "@/lib/db";
 import { isWeekend, weekDays, type IsoDate } from "@/lib/domain/dates";
 import { MEALS, type PlanParams } from "@/lib/domain/menu";
-import { planWeek, replanSlot, type PlannerSlot } from "@/lib/domain/menu-planner";
+import { planWeek, replanSlot, type PlannerRecipe, type PlannerSlot } from "@/lib/domain/menu-planner";
+import { recipeCost } from "@/lib/domain/shopping";
 import { listRecipesForMatching } from "@/lib/recipes/repo";
 import * as repo from "./repo";
+
+/** Recetas de la biblioteca con su coste orientativo por ración. */
+export function plannerRecipes(db: AppDb = getDb()): (PlannerRecipe & ReturnType<typeof listRecipesForMatching>[number])[] {
+  return listRecipesForMatching(db).map((r) => {
+    const cost = recipeCost(r.ingredients);
+    return { ...r, costPerServing: cost === null ? null : cost / Math.max(1, r.servings) };
+  });
+}
 
 /** Huecos de la semana según las comidas elegidas, conservando los fijos. */
 function buildSlots(weekStart: IsoDate, params: PlanParams, previous: repo.SlotRow[]): { slots: PlannerSlot[]; meta: repo.SlotRow[] } {
@@ -32,7 +41,7 @@ export function generateWeek(weekStart: IsoDate, params: PlanParams, seed: numbe
   const previous = repo.getPlan(weekStart, db)?.slots ?? [];
   const { slots, meta } = buildSlots(weekStart, params, previous);
   const { assignments } = planWeek({
-    recipes: listRecipesForMatching(db),
+    recipes: plannerRecipes(db),
     slots,
     params,
     recent: repo.recentRecipes(weekStart, 14, db),
@@ -62,7 +71,7 @@ export function regenerateSlot(slotId: string, seed: number, db: AppDb = getDb()
   const index = plan.slots.findIndex((s) => s.id === slotId);
   const slots: PlannerSlot[] = plan.slots.map((s) => ({ date: s.date, meal: s.meal, weekend: isWeekend(s.date) }));
   const next = replanSlot(
-    { recipes: listRecipesForMatching(db), slots, params: plan.params, recent: repo.recentRecipes(plan.weekStart, 14, db), seed },
+    { recipes: plannerRecipes(db), slots, params: plan.params, recent: repo.recentRecipes(plan.weekStart, 14, db), seed },
     plan.slots.map((s) => s.recipeId),
     index,
   );

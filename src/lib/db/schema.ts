@@ -9,6 +9,7 @@
  */
 import { sql } from "drizzle-orm";
 import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import type { Section } from "@/lib/domain/catalog";
 import type { Meal, PlanParams } from "@/lib/domain/menu";
 import type { RecipeStep, SourceType } from "@/lib/domain/recipe";
 
@@ -109,3 +110,49 @@ export const appSettings = sqliteTable("app_settings", {
   value: text("value", { mode: "json" }).$type<unknown>().notNull(),
   ...timestamps,
 });
+
+// ---------------------------------------------------------------- Fase 5: compra y despensa
+
+/** Lo que hay en casa. Sin cantidad = "tengo de sobra". */
+export const pantryItems = sqliteTable("pantry_items", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  quantity: real("quantity"),
+  unit: text("unit"),
+  ...timestamps,
+});
+
+/** Una lista por semana, generada desde el menú (y editable a mano). */
+export const shoppingLists = sqliteTable("shopping_lists", {
+  id: text("id").primaryKey(),
+  weekStart: text("week_start").notNull().unique(),
+  /** Huella del menú + despensa con que se generó (para avisar si cambian). */
+  fingerprint: text("fingerprint").notNull(),
+  /** Lo que no hace falta comprar porque está en la despensa. */
+  covered: text("covered", { mode: "json" }).$type<{ key: string; name: string; amount: string }[]>().notNull().default(sql`'[]'`),
+  ...timestamps,
+});
+
+export const shoppingItems = sqliteTable(
+  "shopping_items",
+  {
+    id: text("id").primaryKey(),
+    listId: text("list_id")
+      .notNull()
+      .references(() => shoppingLists.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    name: text("name").notNull(),
+    section: text("section").$type<Section>().notNull(),
+    amount: text("amount").notNull().default(""),
+    toTaste: integer("to_taste", { mode: "boolean" }).notNull().default(false),
+    sources: text("sources", { mode: "json" }).$type<string[]>().notNull().default(sql`'[]'`),
+    cost: real("cost"),
+    pantryNote: text("pantry_note"),
+    checked: integer("checked", { mode: "boolean" }).notNull().default(false),
+    /** Añadido a mano (se conserva al regenerar). */
+    manual: integer("manual", { mode: "boolean" }).notNull().default(false),
+    position: integer("position").notNull().default(0),
+    ...timestamps,
+  },
+  (t) => [index("shopping_items_list_idx").on(t.listId)],
+);

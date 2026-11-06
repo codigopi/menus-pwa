@@ -4,6 +4,7 @@ import { BookOpen, Plus, Sparkles } from "lucide-react";
 import { LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { CachePage } from "@/components/pwa/cache-page";
 import { RecipeLibrary } from "@/components/recipes/recipe-library";
 import { fetchRecipes } from "@/lib/recipes/queries";
 import Link from "next/link";
@@ -26,6 +27,7 @@ export default function RecipesPage() {
           </>
         }
       />
+      <CachePage url="/recetas" />
       {/* La cabecera forma parte del "shell" estático; la lista llega en streaming. */}
       <Suspense fallback={<LibrarySkeleton />}>
         <Library />

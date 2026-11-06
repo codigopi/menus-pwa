@@ -154,7 +154,7 @@ export function ParamsSheet({
         </div>
 
         <p className="mx-6 mt-3 text-[13px] text-muted">
-          El presupuesto, de momento, favorece legumbres, huevos, pasta y verdura. Con la lista de la compra llegarán los precios.
+          «Económico» prioriza los platos más baratos por ración, según precios orientativos de supermercado.
         </p>
 
         <div className="mx-3 mt-4">

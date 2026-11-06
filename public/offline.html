@@ -15,6 +15,7 @@
       p { color: var(--muted); margin: 0 0 24px; line-height: 1.45; }
       button { font: inherit; font-weight: 600; color: #fff; background: var(--accent); border: 0;
         border-radius: 999px; padding: 12px 24px; }
+      .link { display: block; margin-top: 18px; color: var(--accent); font-weight: 600; text-decoration: none; }
     </style>
   </head>
   <body>
@@ -23,6 +24,8 @@
       <h1>Sin conexión</h1>
       <p>Esta página aún no está guardada en el móvil.<br />Vuelve a intentarlo cuando tengas red.</p>
       <button onclick="location.reload()">Reintentar</button>
+      <!-- La lista de la compra funciona sin conexión (si se abrió alguna vez) -->
+      <a class="link" href="/compra">Ir a la lista de la compra</a>
     </main>
   </body>
 </html>

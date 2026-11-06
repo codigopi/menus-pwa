@@ -10,7 +10,7 @@
  *
  * Para forzar la actualización en todos los dispositivos, sube VERSION.
  */
-const VERSION = "v1";
+const VERSION = "v3";
 const STATIC_CACHE = `static-${VERSION}`;
 const PAGES_CACHE = `pages-${VERSION}`;
 const PHOTOS_CACHE = "photos"; // no depende de la versión: las fotos no cambian
@@ -64,6 +64,24 @@ async function networkFirstPage(request) {
     return (await cache.match(request)) || (await caches.match(OFFLINE_URL));
   }
 }
+
+/**
+ * La app pide guardar páginas clave (p. ej. /compra) aunque se hayan abierto
+ * con navegación interna, que no pasa por el evento "navigate".
+ */
+self.addEventListener("message", (event) => {
+  const data = event.data;
+  if (!data || data.type !== "cache-page" || typeof data.url !== "string") return;
+  const url = new URL(data.url, self.location.origin);
+  if (url.origin !== self.location.origin) return;
+  event.waitUntil(
+    fetch(url, { credentials: "same-origin" })
+      .then(async (res) => {
+        if (res.ok && !res.redirected) await (await caches.open(PAGES_CACHE)).put(url, res);
+      })
+      .catch(() => {}),
+  );
+});
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;

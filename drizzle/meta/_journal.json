@@ -22,6 +22,13 @@
       "when": 1793924535074,
       "tag": "0002_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1793925323655,
+      "tag": "0003_shopping",
+      "breakpoints": true
     }
   ]
 }

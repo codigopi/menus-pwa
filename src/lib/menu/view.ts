@@ -6,7 +6,7 @@ import { addDays, dayLabel, isIsoDate, isWeekend, mondayOf, todayIso, weekDays, 
 import { classifyRecipe, type Category, type Meal, type PlanParams } from "@/lib/domain/menu";
 import { warningsFor } from "@/lib/domain/menu-planner";
 import { totalMinutes } from "@/lib/domain/recipe";
-import { listRecipesForMatching } from "@/lib/recipes/repo";
+import { plannerRecipes } from "./service";
 import * as repo from "./repo";
 
 export interface MenuRecipe {
@@ -44,6 +44,8 @@ export interface MenuView {
     days: DayView[];
     stats: Partial<Record<Category, number>>;
     warnings: string[];
+    /** Coste orientativo de la semana (solo platos con precio estimable). */
+    cost: { total: number; priced: number; dishes: number };
   } | null;
   defaultParams: PlanParams;
   library: MenuRecipe[];
@@ -54,7 +56,8 @@ export async function loadMenuView(weekParam: string | undefined): Promise<MenuV
   const today = todayIso();
   const weekStart = mondayOf(isIsoDate(weekParam) ? weekParam : today);
 
-  const recipes = listRecipesForMatching();
+  const recipes = plannerRecipes();
+  const costById = new Map(recipes.map((r) => [r.id, r.costPerServing ?? null]));
   const library: MenuRecipe[] = recipes
     .map((r) => ({ id: r.id, title: r.title, photo: r.photo, minutes: totalMinutes(r), category: classifyRecipe(r) }))
     .sort((a, b) => a.title.localeCompare(b.title, "es"));
@@ -64,9 +67,18 @@ export async function loadMenuView(weekParam: string | undefined): Promise<MenuV
   let planView: MenuView["plan"] = null;
   if (plan) {
     const stats: Partial<Record<Category, number>> = {};
+    const cost = { total: 0, priced: 0, dishes: 0 };
     const slotsView: SlotView[] = plan.slots.map((s) => {
       const recipe = s.recipeId ? (byId.get(s.recipeId) ?? null) : null;
-      if (recipe) stats[recipe.category] = (stats[recipe.category] ?? 0) + 1;
+      if (recipe) {
+        stats[recipe.category] = (stats[recipe.category] ?? 0) + 1;
+        cost.dishes++;
+        const cps = costById.get(recipe.id);
+        if (cps != null) {
+          cost.total += cps * plan.params.people;
+          cost.priced++;
+        }
+      }
       return { id: s.id, date: s.date, meal: s.meal, locked: s.locked, freeText: s.freeText, recipe };
     });
     const warnings = warningsFor(
@@ -81,6 +93,7 @@ export async function loadMenuView(weekParam: string | undefined): Promise<MenuV
     planView = {
       params: plan.params,
       stats,
+      cost,
       warnings,
       days: weekDays(weekStart)
         .map((date) => ({ date, label: dayLabel(date), isToday: date === today, slots: slotsView.filter((s) => s.date === date) }))

@@ -155,6 +155,19 @@ describe("planWeek", () => {
     expect(chosen.some((r) => r.ingredients.some((i) => i.name === "tomate"))).toBe(false);
   });
 
+  it("en modo económico prefiere platos baratos según su coste", () => {
+    // Salmón y bacalao caros; el resto barato. El equilibrio sigue pidiendo
+    // pescado, así que no desaparecen, pero deben salir menos que en "normal".
+    const isExpensive = (id: string | null) => id === "salmon" || id === "bacalao";
+    const priced = LIBRARY.map((r) => ({ ...r, costPerServing: isExpensive(r.id) ? 6 : 1 }));
+    const count = (budget: PlanParams["budget"]) =>
+      [1, 2, 3, 4, 5, 6, 7, 8].reduce(
+        (n, seed) => n + planWeek({ recipes: priced, slots: week(), params: params({ budget }), seed }).assignments.filter(isExpensive).length,
+        0,
+      );
+    expect(count("economico")).toBeLessThan(count("normal"));
+  });
+
   it("penaliza lo cocinado la semana pasada", () => {
     const recent = new Map([["tortilla", 3], ["merluza", 3]]);
     const counts = { tortilla: 0 };

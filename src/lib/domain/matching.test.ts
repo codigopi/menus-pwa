@@ -13,6 +13,9 @@ describe("normalización", () => {
     ["arroz", "arroz"],
     ["ajo", "ajo"],
     ["gas", "gas"],
+    ["verdes", "verde"],
+    ["grandes", "grande"],
+    ["dientes", "diente"],
   ])("singular(%s) = %s", (w, s) => expect(singular(w)).toBe(s));
 
   it("tokens quita tildes, conectores y pasa a singular", () => {

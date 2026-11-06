@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
-import { ShoppingBasket } from "lucide-react";
-import { ComingSoon } from "@/components/ui/coming-soon";
+import { Suspense } from "react";
+import { ShoppingScreen } from "@/components/shopping/shopping-screen";
+import { loadShoppingView } from "@/lib/shopping/view";
 
 export const metadata: Metadata = { title: "Lista de la compra" };
 
-export default function Page() {
+export default function ShoppingPage({ searchParams }: PageProps<"/compra">) {
   return (
-    <ComingSoon title="Compra" icon={<ShoppingBasket className="size-8" />} phase={5}>
-      La lista se generará sola desde el menú, agrupada por secciones del súper y restando lo que ya tienes.
-    </ComingSoon>
+    <Suspense fallback={<div aria-hidden className="h-64 animate-pulse rounded-2xl bg-card pt-14" />}>
+      <Content searchParams={searchParams} />
+    </Suspense>
   );
+}
+
+async function Content({ searchParams }: { searchParams: PageProps<"/compra">["searchParams"] }) {
+  const { semana } = await searchParams;
+  const view = await loadShoppingView(typeof semana === "string" ? semana : undefined);
+  return <ShoppingScreen key={view.weekStart} view={view} />;
 }
