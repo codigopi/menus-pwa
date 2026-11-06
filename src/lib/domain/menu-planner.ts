@@ -70,6 +70,24 @@ const CHEAP: Category[] = ["legumbre", "huevo", "pasta_arroz", "verdura"];
 /** Lo que resta cada repetición de un plato en la misma semana. */
 const REPEAT_PENALTY = 9;
 
+/**
+ * Platos propuestos por la app (etiqueta "sugerida"): solo entran si cubren
+ * algo que la pirámide pide y los platos de siempre no. Dejan de restar en
+ * cuanto la familia los adopta (favorito, valoración o quitando la etiqueta).
+ */
+export const SUGGESTED_TAG = "sugerida";
+const SUGGESTED_PENALTY = 2.5;
+
+function isUnadoptedSuggestion(r: PlannerRecipe): boolean {
+  return r.tags.includes(SUGGESTED_TAG) && !r.isFavorite && r.rating === null;
+}
+
+/** Ingrediente principal ("garbanzos cocidos" → "garbanzo") para no repetirlo en la semana. */
+export function mainIngredient(r: Pick<PlannerRecipe, "ingredients">): string | null {
+  const first = r.ingredients[0]?.name.trim().toLowerCase().split(/\s+/)[0];
+  return first ? first.replace(/s$/, "") : null;
+}
+
 /** Recetas permitidas por las restricciones (vegetariano, ingredientes a evitar). */
 export function allowedRecipes<R extends PlannerRecipe>(recipes: R[], params: PlanParams): R[] {
   return recipes.filter((r) => {
@@ -101,6 +119,7 @@ interface Context {
   /** Límites de la pirámide escalados a los días de este menú. */
   limits: { rule: Rule; min?: number; max?: number }[];
   roles: Map<string, Course>;
+  mains: Map<string, string | null>;
   wholeMeals: Set<string>;
   slots: PlannerSlot[];
   assignments: (string | null)[];
@@ -141,6 +160,13 @@ function score(r: PlannerRecipe, index: number, ctx: Context): number {
     else if (Math.abs(i - index) === 1) s -= 3;
   });
 
+  // Mismo ingrediente principal en otro plato de la semana (tres de garbanzos, no).
+  // Los huevos no: ya tienen su propio rango en la pirámide.
+  const main = ctx.mains.get(r.id);
+  if (main && main !== "huevo") {
+    s -= 2 * ctx.assignments.filter((id, i) => i !== index && id && id !== r.id && ctx.mains.get(id) === main).length;
+  }
+
   // Comida vs cena
   const heavy = cat === "legumbre" || r.tags.includes("cuchara");
   if (slot.meal === "cena") {
@@ -165,6 +191,8 @@ function score(r: PlannerRecipe, index: number, ctx: Context): number {
   s += ((r.rating ?? 3) - 3) * 0.8;
   if (r.isFavorite) s += 1;
   if (r.tags.includes("aprovechamiento")) s += 0.5;
+  // Primero los platos de la casa; los sugeridos, para completar
+  if (isUnadoptedSuggestion(r)) s -= SUGGESTED_PENALTY;
   s += (r.taste ?? 0) * 0.8;
 
   // Presupuesto: con precio estimado, cuanto más barata la ración mejor
@@ -239,6 +267,7 @@ function buildContext(input: PlanInput, assignments: (string | null)[]): Context
     flags: new Map(input.recipes.map((r) => [r.id, nutritionFlags(r)])),
     limits: RULES.filter((rule) => rule.id !== "verdura_diaria").map((rule) => ({ rule, ...scaledLimits(rule, new Set(input.slots.map((sl) => sl.date)).size || 7) })),
     roles: new Map(input.recipes.map((r) => [r.id, courseRole(r)])),
+    mains: new Map(input.recipes.map((r) => [r.id, mainIngredient(r)])),
     wholeMeals: new Set(input.recipes.filter(isWholeMeal).map((r) => r.id)),
     slots: input.slots,
     assignments,

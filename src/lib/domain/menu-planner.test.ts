@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { addDays, dayLabel, daysBetween, isIsoDate, isWeekend, mondayOf, todayIso, weekDays, weekRangeLabel } from "./dates";
 import { classifyRecipe, courseRole, DEFAULT_PARAMS, fitsMeal, hasMeatOrFish, isWholeMeal, type Meal, type PlanParams } from "./menu";
-import { allowedRecipes, planWeek, replanSlot, type PlannerRecipe, type PlannerSlot } from "./menu-planner";
+import { allowedRecipes, mainIngredient, planWeek, replanSlot, type PlannerRecipe, type PlannerSlot } from "./menu-planner";
 import { nutritionFlags, weeklyBalance } from "./nutrition";
 
 // ---------------------------------------------------------------- fechas
@@ -372,5 +372,38 @@ describe("replanSlot", () => {
     expect(next).not.toBeNull();
     expect(next).not.toBe(assignments[2]);
     expect(assignments.filter((id, i) => i !== 2)).not.toContain(next);
+  });
+});
+
+describe("platos de la casa y sugeridos", () => {
+  const dinnerWeek = (): PlannerSlot[] => weekDays("2026-11-02").map((date) => ({ date, meal: "cena" as const, weekend: isWeekend(date) }));
+  const veg = (id: string, main: string, extra: Partial<PlannerRecipe> = {}) => rec(id, [main, "cebolla", "calabacín"], { title: id, ...extra });
+
+  it("prefiere los platos de siempre y usa los sugeridos para completar", () => {
+    const casa = ["a", "b", "c", "d", "e", "f", "g"].map((x) => veg(`casa-${x}`, `verdura${x}`));
+    const sugeridos = ["a", "b", "c", "d", "e", "f", "g"].map((x) => veg(`sug-${x}`, `hortaliza${x}`, { tags: ["sugerida"] }));
+    for (const seed of [1, 2, 3]) {
+      const { assignments } = planWeek({ recipes: [...sugeridos, ...casa], slots: dinnerWeek(), params: params({ meals: ["cena"] }), seed });
+      expect(assignments.filter((id) => id?.startsWith("sug-")), `semilla ${seed}`).toEqual([]);
+    }
+    // Con pocos platos de la casa, los sugeridos rellenan antes que repetir
+    const { assignments } = planWeek({ recipes: [...sugeridos, ...casa.slice(0, 3)], slots: dinnerWeek(), params: params({ meals: ["cena"] }), seed: 1 });
+    expect(new Set(assignments).size).toBe(7);
+  });
+
+  it("un sugerido valorado o favorito ya cuenta como de la casa", () => {
+    const casa = veg("casa", "verdura", { rating: 3 });
+    const adoptado = veg("adoptado", "hortaliza", { tags: ["sugerida"], rating: 3 });
+    const slots = dinnerWeek().slice(0, 1);
+    const picks = [1, 2, 3, 4, 5, 6, 7, 8].map((seed) => planWeek({ recipes: [casa, adoptado], slots, params: params({ meals: ["cena"] }), seed }).assignments[0]);
+    expect(picks).toContain("adoptado");
+  });
+
+  it("no repite el mismo ingrediente principal en la semana si hay alternativa", () => {
+    expect(mainIngredient({ ingredients: [{ name: "Garbanzos cocidos" }] })).toBe("garbanzo");
+    const garbanzos = ["a", "b", "c"].map((x) => veg(`garbanzos-${x}`, "garbanzos cocidos"));
+    const otros = ["a", "b", "c", "d", "e"].map((x) => veg(`otro-${x}`, `verdura${x}`));
+    const { assignments } = planWeek({ recipes: [...garbanzos, ...otros], slots: dinnerWeek(), params: params({ meals: ["cena"] }), seed: 3 });
+    expect(assignments.filter((id) => id?.startsWith("garbanzos")).length).toBeLessThanOrEqual(1);
   });
 });
