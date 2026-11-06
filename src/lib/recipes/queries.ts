@@ -6,6 +6,7 @@
  * como "en tiempo de petición", así los datos siempre están frescos.
  */
 import { connection } from "next/server";
+import { loadTaste, withTaste } from "@/lib/taste/service";
 import * as repo from "./repo";
 
 export async function fetchRecipes() {
@@ -15,7 +16,8 @@ export async function fetchRecipes() {
 
 export async function fetchRecipesForMatching() {
   await connection();
-  return repo.listRecipesForMatching();
+  const { recipes, profile } = loadTaste();
+  return withTaste(recipes, profile);
 }
 
 export async function fetchRecipe(id: string) {

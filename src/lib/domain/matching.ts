@@ -89,6 +89,8 @@ export interface MatchableRecipe {
   tags: string[];
   rating: number | null;
   ingredients: { name: string; quantity: number | null; unit: string | null; note: string | null }[];
+  /** Encaje con los gustos de la casa (opcional). */
+  taste?: number;
 }
 
 export interface RecipeMatch<R extends MatchableRecipe = MatchableRecipe> {
@@ -142,6 +144,7 @@ export function matchRecipes<R extends MatchableRecipe>(recipes: R[], have: stri
       a.missing.length - b.missing.length ||
       b.used.length - a.used.length ||
       leftovers(b.recipe) - leftovers(a.recipe) ||
+      (b.recipe.taste ?? 0) - (a.recipe.taste ?? 0) ||
       (b.recipe.rating ?? 0) - (a.recipe.rating ?? 0) ||
       a.recipe.title.localeCompare(b.recipe.title, "es"),
   );

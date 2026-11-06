@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { WhatToCook } from "@/components/cook/what-to-cook";
 import { PageHeader } from "@/components/ui/page-header";
+import { isAiConfigured } from "@/lib/ai/config";
 import { fetchRecipesForMatching } from "@/lib/recipes/queries";
 
 export const metadata: Metadata = { title: "¿Qué cocino?" };
@@ -18,6 +19,6 @@ export default function WhatToCookPage() {
 }
 
 async function Content() {
-  const recipes = await fetchRecipesForMatching();
-  return <WhatToCook recipes={recipes} />;
+  const recipes = await fetchRecipesForMatching(); // tras connection(): tiempo de petición
+  return <WhatToCook recipes={recipes} aiEnabled={isAiConfigured()} />;
 }

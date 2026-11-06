@@ -8,6 +8,8 @@ import { isWeekend, weekDays, type IsoDate } from "@/lib/domain/dates";
 import { MEALS, type PlanParams } from "@/lib/domain/menu";
 import { planWeek, replanSlot, type PlannerRecipe, type PlannerSlot } from "@/lib/domain/menu-planner";
 import { recipeCost } from "@/lib/domain/shopping";
+import { tasteScore } from "@/lib/domain/taste";
+import { loadTaste } from "@/lib/taste/service";
 import { listRecipesForMatching } from "@/lib/recipes/repo";
 import { cookedRecently } from "@/lib/history/repo";
 import * as repo from "./repo";
@@ -24,9 +26,10 @@ function recentFor(weekStart: IsoDate, db: AppDb): Map<string, number> {
 
 /** Recetas de la biblioteca con su coste orientativo por ración. */
 export function plannerRecipes(db: AppDb = getDb()): (PlannerRecipe & ReturnType<typeof listRecipesForMatching>[number])[] {
+  const { profile } = loadTaste(db);
   return listRecipesForMatching(db).map((r) => {
     const cost = recipeCost(r.ingredients);
-    return { ...r, costPerServing: cost === null ? null : cost / Math.max(1, r.servings) };
+    return { ...r, costPerServing: cost === null ? null : cost / Math.max(1, r.servings), taste: tasteScore(r, profile) };
   });
 }
 

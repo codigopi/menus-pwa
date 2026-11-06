@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
-import { Check, ChevronDown, Clock3, Plus, Recycle, Search, Sparkles, X } from "lucide-react";
+import { Check, ChevronDown, Plus, Recycle, Search, X } from "lucide-react";
 import { cn } from "@/components/ui/cn";
 import { RecipePhoto } from "@/components/recipes/recipe-photo";
+import { IdeaGenerator } from "@/components/taste/idea-generator";
 import { usePersistentList } from "@/lib/hooks/use-persistent-list";
 import {
   COMMON_INGREDIENTS,
@@ -30,7 +31,7 @@ const label = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * "¿Qué cocino?": eliges lo que tienes y se buscan recetas de tu biblioteca,
  * indicando qué usas y qué te falta. Todo se calcula en el móvil, al instante.
  */
-export function WhatToCook({ recipes }: { recipes: Recipe[] }) {
+export function WhatToCook({ recipes, aiEnabled }: { recipes: Recipe[]; aiEnabled: boolean }) {
   const [have, setHave] = usePersistentList("cec:tengo", EMPTY);
   const [staples, setStaples] = usePersistentList("cec:basicos", DEFAULT_STAPLES);
   const [draft, setDraft] = useState("");
@@ -179,19 +180,15 @@ export function WhatToCook({ recipes }: { recipes: Recipe[] }) {
         </>
       )}
 
-      {/* Generación con IA: pendiente */}
-      <section className="mt-8 flex gap-3 rounded-2xl bg-fill p-4">
-        <Sparkles className="mt-0.5 size-5 shrink-0 text-muted" />
-        <div className="text-[14px] leading-snug">
-          <p className="font-semibold">Recetas nuevas con IA</p>
-          <p className="mt-0.5 text-muted">
-            Ideas caseras inventadas con lo que tienes, priorizando el aprovechamiento.
-          </p>
-          <p className="mt-2 flex items-center gap-1.5 text-[13px] text-muted">
-            <Clock3 className="size-3.5" /> Pendiente de configurar la IA
-          </p>
-        </div>
-      </section>
+      {/* Recetas nuevas inventadas con IA a partir de lo que hay */}
+      <IdeaGenerator
+        aiEnabled={aiEnabled}
+        mode="ingredientes"
+        ingredients={have}
+        staples={staples}
+        title="Recetas nuevas con lo que tienes"
+        subtitle={have.length ? `Ideas caseras inventadas con ${have.join(", ")}, priorizando el aprovechamiento.` : "Añade arriba lo que tienes y te propongo recetas nuevas de aprovechamiento."}
+      />
     </div>
   );
 }

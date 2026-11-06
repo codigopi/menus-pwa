@@ -21,6 +21,8 @@ export interface PlannerRecipe {
   ingredients: { name: string }[];
   /** Coste orientativo por ración en € (null si no se puede estimar). */
   costPerServing?: number | null;
+  /** Encaje con los gustos de la casa (-2…+2), aprendido del histórico. */
+  taste?: number;
 }
 
 export interface PlannerSlot {
@@ -146,6 +148,7 @@ function score(r: PlannerRecipe, index: number, ctx: Context): number {
   s += ((r.rating ?? 3) - 3) * 0.8;
   if (r.isFavorite) s += 1;
   if (r.tags.includes("aprovechamiento")) s += 0.5;
+  s += (r.taste ?? 0) * 0.8;
 
   // Presupuesto: con precio estimado, cuanto más barata la ración mejor
   // (≈2 €/ración es neutro); sin precio, por tipo de plato.
