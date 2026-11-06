@@ -5,7 +5,7 @@
 import type { AppDb } from "@/lib/db";
 import { getDb } from "@/lib/db";
 import { isWeekend, weekDays, type IsoDate } from "@/lib/domain/dates";
-import { lunchCourses, MEALS, type Course, type PlanParams } from "@/lib/domain/menu";
+import { lunchCourses, MEALS, type Course, type PlanParams, type TemplateEntry } from "@/lib/domain/menu";
 import { planWeek, replanSlot, type PlannerRecipe, type PlannerSlot } from "@/lib/domain/menu-planner";
 import { recipeCost } from "@/lib/domain/shopping";
 import { tasteScore } from "@/lib/domain/taste";
@@ -75,11 +75,12 @@ function fillAndSave(
   seed: number,
   db: AppDb,
   keepAll = false,
+  recipes: PlannerRecipe[] = plannerRecipes(db),
 ): void {
   const { slots, meta } = buildSlots(weekStart, params, previous, singleDays, keepAll);
   const previousByKey = new Map(previous.map((p) => [repo.slotKey(p), p.recipeId]));
   const { assignments } = planWeek({
-    recipes: plannerRecipes(db),
+    recipes,
     slots,
     params,
     recent: recentFor(weekStart, db),
@@ -106,11 +107,40 @@ function fillAndSave(
   );
 }
 
-/** Genera la semana (o regenera lo no bloqueado si ya existe). */
+/**
+ * Entradas de la plantilla semanal que toca aplicar a esta semana. Se saltan
+ * las de comidas que no se planifican, las de recetas borradas y los huecos
+ * que la familia ya ha fijado (bloqueado) con otra cosa.
+ */
+export function pendingTemplate(params: PlanParams, weekStart: IsoDate, slots: repo.SlotRow[], recipeIds: Set<string>): TemplateEntry[] {
+  const days = weekDays(weekStart);
+  return params.template.filter((e) => {
+    if (!params.meals.includes(e.meal)) return false;
+    if (e.recipeId !== null && !recipeIds.has(e.recipeId)) return false;
+    const taken = slots.filter((s) => s.locked && s.date === days[e.day] && s.meal === e.meal);
+    return taken.length === 0 || taken.every((s) => s.recipeId === e.recipeId && s.freeText === e.text);
+  });
+}
+
+/** Genera la semana (o regenera lo no bloqueado si ya existe), partiendo de la plantilla. */
 export function generateWeek(weekStart: IsoDate, params: PlanParams, seed: number, db: AppDb = getDb()): void {
   repo.saveParams(weekStart, params, db); // generar también fija la preferencia
   const plan = repo.getPlan(weekStart, db);
-  fillAndSave(weekStart, params, plan?.slots ?? [], plan?.singleCourseDays ?? [], seed, db);
+  const recipes = plannerRecipes(db);
+  const entries = pendingTemplate(params, weekStart, plan?.slots ?? [], new Set(recipes.map((r) => r.id)));
+
+  // Cada entrada es un hueco fijo (bloqueado); en la comida, ese día es de plato único.
+  const days = weekDays(weekStart);
+  const singleDays = new Set(plan?.singleCourseDays ?? []);
+  const fromTemplate: repo.SlotRow[] = entries.map((e) => {
+    if (e.meal === "comida") singleDays.add(days[e.day]);
+    return { id: "", date: days[e.day], meal: e.meal, course: "unico", recipeId: e.recipeId, freeText: e.text, locked: true };
+  });
+  const previous = [
+    ...(plan?.slots ?? []).filter((s) => !fromTemplate.some((t) => t.date === s.date && t.meal === s.meal)),
+    ...fromTemplate,
+  ];
+  fillAndSave(weekStart, params, previous, [...singleDays].sort(), seed, db, false, recipes);
 }
 
 /**

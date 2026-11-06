@@ -146,4 +146,53 @@ describe("servicio de menú", () => {
     deleteRecipe(plan.slots[0].recipeId!, db);
     expect(getPlan("2026-11-02", db)!.slots[0].recipeId).toBeNull();
   });
+
+  describe("plantilla semanal", () => {
+    // 2026-11-02 es lunes: viernes = 06, sábado = 07
+    const withTemplate = (pizzaId: string) => ({
+      ...DEFAULT_PARAMS,
+      template: [
+        { day: 4, meal: "cena" as const, recipeId: pizzaId, text: null },
+        { day: 5, meal: "cena" as const, recipeId: null, text: "Pedir a domicilio" as const },
+        { day: 6, meal: "comida" as const, recipeId: null, text: "Comer fuera" as const },
+      ],
+    });
+    const slot = (date: string, meal: string) => getPlan("2026-11-02", db)!.slots.filter((s) => s.date === date && s.meal === meal);
+
+    it("los huecos de la plantilla salen puestos y bloqueados; el domingo es plato único", () => {
+      const pizza = make("Pizza", ["masa de pizza", "mozzarella"]);
+      generateWeek("2026-11-02", withTemplate(pizza), 1, db);
+      expect(slot("2026-11-06", "cena")).toMatchObject([{ recipeId: pizza, locked: true }]);
+      expect(slot("2026-11-07", "cena")).toMatchObject([{ recipeId: null, freeText: "Pedir a domicilio", locked: true }]);
+      expect(slot("2026-11-08", "comida")).toMatchObject([{ course: "unico", freeText: "Comer fuera", locked: true }]);
+      const plan = getPlan("2026-11-02", db)!;
+      expect(plan.slots).toHaveLength(20);
+      // La pizza no se repite en otros huecos
+      expect(plan.slots.filter((s) => s.recipeId === pizza)).toHaveLength(1);
+    });
+
+    it("al regenerar se mantiene, salvo donde la familia ha fijado otra cosa", () => {
+      const pizza = make("Pizza", ["masa de pizza", "mozzarella"]);
+      const params = withTemplate(pizza);
+      generateWeek("2026-11-02", params, 1, db);
+      const [friday] = slot("2026-11-06", "cena");
+      const other = getPlan("2026-11-02", db)!.slots.find((s) => s.recipeId && s.recipeId !== pizza)!.recipeId!;
+      updateSlot(friday.id, { recipeId: other, freeText: null, locked: true }, db);
+      generateWeek("2026-11-02", params, 2, db);
+      expect(slot("2026-11-06", "cena")).toMatchObject([{ id: friday.id, recipeId: other }]);
+      expect(slot("2026-11-07", "cena")).toMatchObject([{ freeText: "Pedir a domicilio" }]);
+    });
+
+    it("añadir una entrada y regenerar la aplica a la semana actual; las de recetas borradas se ignoran", () => {
+      generateWeek("2026-11-02", DEFAULT_PARAMS, 1, db);
+      const pizza = make("Pizza", ["masa de pizza", "mozzarella"]);
+      generateWeek("2026-11-02", withTemplate(pizza), 2, db);
+      expect(slot("2026-11-06", "cena")).toMatchObject([{ recipeId: pizza }]);
+      deleteRecipe(pizza, db);
+      generateWeek("2026-11-09", withTemplate(pizza), 1, db);
+      const friday = getPlan("2026-11-09", db)!.slots.find((s) => s.date === "2026-11-13" && s.meal === "cena")!;
+      expect(friday.recipeId).not.toBeNull();
+      expect(friday.locked).toBe(false);
+    });
+  });
 });

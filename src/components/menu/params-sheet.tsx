@@ -9,6 +9,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { Stepper } from "@/components/ui/stepper";
 import { Switch } from "@/components/ui/switch";
 import { familyLabel, MEAL_LABELS, MEALS, type Meal, type PlanParams } from "@/lib/domain/menu";
+import { TemplateEditor } from "./template-editor";
 
 const TIME_OPTIONS: (number | null)[] = [20, 30, 45, 60, 90, null];
 const timeLabel = (m: number | null) => (m === null ? "Sin límite" : `Hasta ${m} min`);
@@ -29,6 +30,7 @@ export function paramsSummary(p: PlanParams): string {
   if (p.maxMinutesWeekday) parts.push(`≤${p.maxMinutesWeekday} min entre semana`);
   if (p.vegetarian) parts.push("vegetariano");
   if (p.budget === "economico") parts.push("económico");
+  if (p.template.length) parts.push(`plantilla (${p.template.length})`);
   return parts.join(" · ");
 }
 
@@ -37,6 +39,7 @@ export function ParamsSheet({
   onClose,
   initial,
   hasPlan,
+  library,
   pending,
   onSubmit,
   onSave,
@@ -45,6 +48,8 @@ export function ParamsSheet({
   onClose: () => void;
   initial: PlanParams;
   hasPlan: boolean;
+  /** Recetas para elegir en la plantilla semanal. */
+  library: { id: string; title: string }[];
   pending: boolean;
   /** Generar/regenerar con estos ajustes (también los guarda). */
   onSubmit: (params: PlanParams) => void;
@@ -134,6 +139,10 @@ export function ParamsSheet({
           )}
           <TimeRow label="Entre semana" value={p.maxMinutesWeekday} onChange={(v) => set("maxMinutesWeekday", v)} />
           <TimeRow label="Fin de semana" value={p.maxMinutesWeekend} onChange={(v) => set("maxMinutesWeekend", v)} />
+        </div>
+
+        <div className="mx-3 mt-4 overflow-hidden rounded-2xl bg-card">
+          <TemplateEditor value={p.template} meals={p.meals} library={library} onChange={(v) => set("template", v)} />
         </div>
 
         <div className="mx-3 mt-4 divide-y divide-hairline overflow-hidden rounded-2xl bg-card">

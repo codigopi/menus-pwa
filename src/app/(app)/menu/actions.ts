@@ -5,7 +5,7 @@
  */
 import { revalidatePath } from "next/cache";
 import { isIsoDate, mondayOf } from "@/lib/domain/dates";
-import { planParamsSchema, type PlanParams } from "@/lib/domain/menu";
+import { FREE_TEXTS, planParamsSchema, type PlanParams } from "@/lib/domain/menu";
 import * as repo from "@/lib/menu/repo";
 import { generateWeek, regenerateSlot, setDaySingleCourse } from "@/lib/menu/service";
 import { getRecipe } from "@/lib/recipes/repo";
@@ -64,11 +64,11 @@ export async function setSlotRecipe(slotId: string, recipeId: string): Promise<v
   done();
 }
 
-const FREE_TEXTS = new Set(["Sobras", "Comer fuera", "Improvisar"]);
+const FREE_TEXT_SET = new Set<string>(FREE_TEXTS);
 
 /** "Sobras", "Comer fuera"… (bloqueado) o null para dejar el hueco vacío. */
 export async function setSlotFreeText(slotId: string, text: string | null): Promise<void> {
-  if (!repo.getSlot(slotId) || (text !== null && !FREE_TEXTS.has(text))) return;
+  if (!repo.getSlot(slotId) || (text !== null && !FREE_TEXT_SET.has(text))) return;
   repo.updateSlot(slotId, { recipeId: null, freeText: text, locked: text !== null });
   done();
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
-import { BookOpen, ChefHat, ChevronLeft, CircleSlash, Lock, LockOpen, Rows2, Search, Shuffle, Soup, Utensils } from "lucide-react";
+import { Bike, BookOpen, ChefHat, ChevronLeft, CircleSlash, Lock, LockOpen, Rows2, Search, Shuffle, Soup, Utensils } from "lucide-react";
 import { RecipePhoto } from "@/components/recipes/recipe-photo";
 import { cn } from "@/components/ui/cn";
 import { Sheet } from "@/components/ui/sheet";
@@ -142,6 +142,9 @@ export function SlotSheet({
             </SheetButton>
             <SheetButton icon={<Utensils className="size-5" />} onClick={run(() => actions.setFreeText(slot.id, "Comer fuera"))}>
               Comer fuera
+            </SheetButton>
+            <SheetButton icon={<Bike className="size-5" />} onClick={run(() => actions.setFreeText(slot.id, "Pedir a domicilio"))}>
+              Pedir a domicilio
             </SheetButton>
             {slot.meal === "comida" && twoCourseLunch && (
               <SheetButton icon={<Rows2 className="size-5" />} onClick={run(() => actions.setDayCourses(slot.id, slot.course !== "unico"))}>

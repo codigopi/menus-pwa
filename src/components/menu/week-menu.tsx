@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { AlertTriangle, CalendarDays, Check, Lock, Salad, Plus, RefreshCw, SlidersHorizontal, Soup, Trash2, Utensils, X } from "lucide-react";
+import { AlertTriangle, Bike, CalendarDays, Check, Lock, Salad, Plus, RefreshCw, SlidersHorizontal, Soup, Trash2, Utensils, X } from "lucide-react";
 import {
   deleteMenu,
   generateMenu,
@@ -227,6 +227,7 @@ export function WeekMenu({ view }: { view: MenuView }) {
           onClose={() => setParamsOpen(false)}
           initial={plan?.params ?? view.defaultParams}
           hasPlan={!!plan}
+          library={view.library}
           pending={pending}
           onSubmit={generate}
           onSave={saveParams}
@@ -283,7 +284,7 @@ function SlotRow({ slot, busy, onOpen }: { slot: SlotView; busy: boolean; onOpen
         </>
       ) : slot.freeText ? (
         <span className="flex min-w-0 flex-1 items-center gap-2 text-[16px] text-muted">
-          {slot.freeText === "Sobras" ? <Soup className="size-5" /> : <Utensils className="size-5" />}
+          {slot.freeText === "Sobras" ? <Soup className="size-5" /> : slot.freeText === "Pedir a domicilio" ? <Bike className="size-5" /> : <Utensils className="size-5" />}
           {slot.freeText}
         </span>
       ) : (

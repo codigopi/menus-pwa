@@ -25,6 +25,31 @@ export const COURSES = ["primero", "segundo", "unico"] as const;
 export type Course = (typeof COURSES)[number];
 export const COURSE_LABELS: Record<Course, string> = { primero: "Primero", segundo: "Segundo", unico: "Plato único" };
 
+/** Huecos sin receta: "Sobras", "Comer fuera"… */
+export const FREE_TEXTS = ["Sobras", "Comer fuera", "Pedir a domicilio", "Improvisar"] as const;
+export type FreeText = (typeof FREE_TEXTS)[number];
+
+/** Días de la plantilla: 0 = lunes … 6 = domingo. */
+export const WEEKDAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"] as const;
+
+/**
+ * Entrada de la plantilla semanal: lo que se hace siempre ese día
+ * (p. ej. viernes cena → Pizza, sábado cena → Pedir a domicilio).
+ * Lleva una receta o un texto, nunca las dos cosas.
+ */
+export const templateEntrySchema = z
+  .object({
+    day: z.number().int().min(0).max(6),
+    meal: z.enum(MEALS),
+    recipeId: z.string().min(1).nullable(),
+    text: z.enum(FREE_TEXTS).nullable(),
+  })
+  .refine((e) => (e.recipeId === null) !== (e.text === null), "Receta o texto, uno de los dos");
+export type TemplateEntry = z.infer<typeof templateEntrySchema>;
+
+export const sameTemplateSlot = (a: Pick<TemplateEntry, "day" | "meal">, b: Pick<TemplateEntry, "day" | "meal">) =>
+  a.day === b.day && a.meal === b.meal;
+
 export const planParamsSchema = z.object({
   adults: z.number().int().min(1).max(12),
   /** Niños: comen raciones algo menores y no deben tomar pescados con mucho mercurio. */
@@ -39,6 +64,11 @@ export const planParamsSchema = z.object({
   vegetarian: z.boolean(),
   /** Ingredientes a evitar ("cerdo", "marisco"…). */
   avoid: z.array(z.string().trim().min(1).max(40)).max(20),
+  /** Plantilla semanal: huecos que se rellenan siempre igual al crear el menú. */
+  template: z
+    .array(templateEntrySchema)
+    .max(14)
+    .refine((t) => t.every((e, i) => t.findIndex((o) => sameTemplateSlot(o, e)) === i), "Un hueco repetido en la plantilla"),
 });
 export type PlanParams = z.infer<typeof planParamsSchema>;
 
@@ -52,6 +82,7 @@ export const DEFAULT_PARAMS: PlanParams = {
   budget: "normal",
   vegetarian: false,
   avoid: [],
+  template: [],
 };
 
 /** Ración de un niño respecto a la de un adulto (orientativo). */

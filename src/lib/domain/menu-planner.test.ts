@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { addDays, dayLabel, daysBetween, isIsoDate, isWeekend, mondayOf, todayIso, weekDays, weekRangeLabel } from "./dates";
-import { classifyRecipe, courseRole, DEFAULT_PARAMS, fitsMeal, hasMeatOrFish, isWholeMeal, type Meal, type PlanParams } from "./menu";
+import { classifyRecipe, courseRole, DEFAULT_PARAMS, fitsMeal, hasMeatOrFish, isWholeMeal, normalizeParams, planParamsSchema, type Meal, type PlanParams } from "./menu";
 import { allowedRecipes, mainIngredient, planWeek, replanSlot, type PlannerRecipe, type PlannerSlot } from "./menu-planner";
 import { nutritionFlags, weeklyBalance } from "./nutrition";
 
@@ -405,5 +405,28 @@ describe("platos de la casa y sugeridos", () => {
     const otros = ["a", "b", "c", "d", "e"].map((x) => veg(`otro-${x}`, `verdura${x}`));
     const { assignments } = planWeek({ recipes: [...garbanzos, ...otros], slots: dinnerWeek(), params: params({ meals: ["cena"] }), seed: 3 });
     expect(assignments.filter((id) => id?.startsWith("garbanzos")).length).toBeLessThanOrEqual(1);
+  });
+});
+
+describe("plantilla semanal en los ajustes", () => {
+  const entry = { day: 4, meal: "cena" as const, recipeId: "pizza", text: null };
+
+  it("valida las entradas", () => {
+    expect(planParamsSchema.safeParse({ ...DEFAULT_PARAMS, template: [entry] }).success).toBe(true);
+    // Mismo hueco dos veces
+    expect(planParamsSchema.safeParse({ ...DEFAULT_PARAMS, template: [entry, { ...entry, recipeId: "otra" }] }).success).toBe(false);
+    // Receta y texto a la vez, o ninguno
+    expect(planParamsSchema.safeParse({ ...DEFAULT_PARAMS, template: [{ ...entry, text: "Sobras" }] }).success).toBe(false);
+    expect(planParamsSchema.safeParse({ ...DEFAULT_PARAMS, template: [{ ...entry, recipeId: null }] }).success).toBe(false);
+    // Texto que no es de la lista
+    expect(planParamsSchema.safeParse({ ...DEFAULT_PARAMS, template: [{ ...entry, recipeId: null, text: "Cena de gala" }] }).success).toBe(false);
+  });
+
+  it("los ajustes guardados antes de la plantilla siguen valiendo (plantilla vacía)", () => {
+    const old: Partial<PlanParams> = { ...DEFAULT_PARAMS, adults: 2, children: 3 };
+    delete old.template;
+    const p = normalizeParams(old);
+    expect(p.template).toEqual([]);
+    expect(p.children).toBe(3);
   });
 });
